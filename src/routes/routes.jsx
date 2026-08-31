@@ -6,6 +6,7 @@ import Roadmap from "@/pages/private/Roadmap";
 import AgenteIA from "@/pages/private/Agente IA";
 import Chats from "@/pages/private/Chats";
 import App from "@/App";
+import Registro from "@/pages/public/Registro/Registro";
 
 
 const router = createBrowserRouter(
@@ -13,6 +14,7 @@ const router = createBrowserRouter(
         <Route path="/" element={<App />}>
             <Route index element={<Home />} />
             <Route path="/inicio" element={<Inicio />} />
+             <Route path="/registro" element={<Registro />} />
             <Route path="/forum" element={<Forum />} />
             <Route path="/roadmap" element={<Roadmap />} />
             <Route path="/agent" element={<AgenteIA />} />
