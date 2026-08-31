@@ -79,7 +79,7 @@ export default function FormularioRegistro() {
       </button>
       <p className="text-center text-sm text-[#aaa5b0]">
         ¿Ya tienes cuenta?{' '}
-        <a href="/inicio" className="text-[#3da3ee] hover:underline">
+        <a href="/login" className="text-[#3da3ee] hover:underline">
           Inicia sesión
         </a>
       </p>
