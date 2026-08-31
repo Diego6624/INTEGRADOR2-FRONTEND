@@ -7,30 +7,26 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const projects = [
     {
-        "name": "Foro",
-        "icon": Users,
-        "url": "/forum"
-
+        name: "Foro",
+        icon: Users,
+        url: "/forum"
     },
     {
-        "name": "Roadmap",
-        "icon": Map,
-        "url": "/roadmap"
-
+        name: "Roadmap",
+        icon: Map,
+        url: "/roadmap"
     },
     {
-        "name": "Agente IA",
-        "icon": Brain,
-        "url": "/agent"
-
+        name: "Agente IA",
+        icon: Brain,
+        url: "/agent"
     },
     {
-        "name": "Chats",
-        "icon": MessageCircle,
-        "url": "/chat"
-
+        name: "Chats",
+        icon: MessageCircle,
+        url: "/chat"
     },
-]
+];
 
 export function AppSidebar() {
 
