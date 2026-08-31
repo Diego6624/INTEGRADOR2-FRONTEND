@@ -42,7 +42,7 @@ export function AppSidebar() {
             <SidebarHeader className="p-4 group-data-[collapsible=icon]:p-2 flex justify-center items-center">
 
                 {/* LOGO */}
-                <Link to="/" className="flex flex-col items-center justify-center gap-2 group-data-[collapsible=icon]:hidden">
+                <Link to="/home" className="flex flex-col items-center justify-center gap-2 group-data-[collapsible=icon]:hidden">
                     <span className="text-3xl font-bold tracking-tight">
                         Journet
                     </span>
@@ -180,7 +180,7 @@ export function AppSidebar() {
 
                                 <DropdownMenuSeparator />
                                 
-                                <Link to={"/login"} className="w-full h-full cursor-pointer">
+                                <Link to={"/"} className="w-full h-full cursor-pointer">
                                     <DropdownMenuItem
                                         className="text-red-500 focus:text-red-500 w-full h-full"
                                         onClick={() => {

@@ -57,7 +57,7 @@ export default function FormularioInicio() {
         Recuérdame
       </div>
 
-      <Link to="/" className="flex w-full">
+      <Link to="/home" className="flex w-full">
         <button type="submit" className="h-12 w-full rounded-lg bg-gradient-to-r from-[#40a9e6] to-[#3d7de3] font-bold text-white transition hover:brightness-110">
           Ingresar
         </button>
