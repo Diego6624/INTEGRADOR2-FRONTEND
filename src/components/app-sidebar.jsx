@@ -179,15 +179,17 @@ export function AppSidebar() {
                                 </DropdownMenuItem>
 
                                 <DropdownMenuSeparator />
-
-                                <DropdownMenuItem
-                                    className="text-red-500 focus:text-red-500"
-                                    onClick={() => {
-                                        console.log("Cerrar sesión");
-                                    }}
-                                >
-                                    Cerrar sesión
-                                </DropdownMenuItem>
+                                
+                                <Link to={"/login"} className="w-full h-full cursor-pointer">
+                                    <DropdownMenuItem
+                                        className="text-red-500 focus:text-red-500 w-full h-full"
+                                        onClick={() => {
+                                            console.log("Cerrar sesión");
+                                        }}
+                                    >
+                                        Cerrar sesión
+                                    </DropdownMenuItem>
+                                </Link>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </SidebarMenuItem>

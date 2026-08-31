@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Mail } from 'lucide-react'
 import CampoContrasena from './CampoContrasena'
+import { Link } from 'react-router-dom'
 
 export default function FormularioInicio() {
   const [correo, setCorreo] = useState('')
@@ -42,30 +43,31 @@ export default function FormularioInicio() {
         cambiarValor={setContrasena}
       />
 
-    <div className="flex items-center gap-3 text-sm text-[#aaa5b0]">
+      <div className="flex items-center gap-3 text-sm text-[#aaa5b0]">
         <div
-          className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300 ${
-            recordarme ? 'bg-blue-500' : 'bg-white/20'
-        }`}
-      >
-       <button type="button"
-         onClick={() => setRecordarme(!recordarme)}
-         className={`absolute top-0.5 left-0.5 h-5 w-5 cursor-pointer rounded-full bg-white shadow-md transition-transform duration-300 ${
-           recordarme ? 'translate-x-5' : 'translate-x-0'
-        }`}
-      />
+          className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300 ${recordarme ? 'bg-blue-500' : 'bg-white/20'
+            }`}
+        >
+          <button type="button"
+            onClick={() => setRecordarme(!recordarme)}
+            className={`absolute top-0.5 left-0.5 h-5 w-5 cursor-pointer rounded-full bg-white shadow-md transition-transform duration-300 ${recordarme ? 'translate-x-5' : 'translate-x-0'
+              }`}
+          />
+        </div>
+        Recuérdame
       </div>
-       Recuérdame
-    </div>
 
-      <button type="submit" className="h-12 rounded-lg bg-gradient-to-r from-[#40a9e6] to-[#3d7de3] font-bold text-white transition hover:brightness-110">
-        Ingresar
-      </button>
+      <Link to="/" className="flex w-full">
+        <button type="submit" className="h-12 w-full rounded-lg bg-gradient-to-r from-[#40a9e6] to-[#3d7de3] font-bold text-white transition hover:brightness-110">
+          Ingresar
+        </button>
+      </Link>
+
 
       <div className="border-t border-white/40" />
 
       <button type="button" className="flex h-12 items-center justify-center gap-3 rounded-lg bg-[#505052] text-white hover:brightness-110">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="h-5 w-5"/>
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="h-5 w-5" />
         Ingresar con Google
       </button>
 
