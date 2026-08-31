@@ -40,7 +40,7 @@ export function Header() {
 
                 <Avatar size="lg">
                     <AvatarImage alt="USER" className={'bg-blue-500'} />
-                    <AvatarFallback className={'bg-blue-500 text-white'}>CN</AvatarFallback>
+                    <AvatarFallback className={'bg-blue-500 text-white'}>PS</AvatarFallback>
                 </Avatar>
             </div>
 
