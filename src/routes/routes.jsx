@@ -11,15 +11,19 @@ import Registro from "@/pages/public/Registro/Registro";
 
 const router = createBrowserRouter(
     createRoutesFromElements(
-        <Route path="/" element={<App />}>
-            <Route index element={<Home />} />
-            <Route path="/inicio" element={<Inicio />} />
-             <Route path="/registro" element={<Registro />} />
-            <Route path="/forum" element={<Forum />} />
-            <Route path="/roadmap" element={<Roadmap />} />
-            <Route path="/agent" element={<AgenteIA />} />
-            <Route path="/chat" element={<Chats />} />
-        </Route>
+        <>
+            <Route path="/login" element={<Inicio />} />
+            <Route path="/register" element={<Registro />} />
+
+            <Route path="/" element={<App />}>
+                <Route index element={<Home />} />
+                <Route path="/forum" element={<Forum />} />
+                <Route path="/roadmap" element={<Roadmap />} />
+                <Route path="/agent" element={<AgenteIA />} />
+                <Route path="/chat" element={<Chats />} />
+            </Route>
+
+        </>
     )
 );
 

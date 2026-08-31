@@ -71,7 +71,7 @@ export default function FormularioInicio() {
 
       <p className="text-center text-sm text-[#aaa5b0]">
         ¿No tienes cuenta?{' '}
-        <a href="/registro" className="text-[#3da3ee] hover:underline">
+        <a href="/register" className="text-[#3da3ee] hover:underline">
           Regístrate
         </a>
       </p>

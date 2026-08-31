@@ -39,19 +39,17 @@ export function AppSidebar() {
             className="flex flex-col justify-center min-w-min"
         >
             {/* HEADER */}
-            <SidebarHeader className="p-4 group-data-[collapsible=icon]:p-2">
-                <div className="flex items-center justify-between group-data-[collapsible=icon]:justify-center">
-                    {/* LOGO */}
-                    <Link to="/" className="flex flex-col items-center justify-center gap-2 group-data-[collapsible=icon]:hidden">
-                        <span className="text-3xl font-bold tracking-tight">
-                            Journet
-                        </span>
-                        <hr className="border-white w-full" />
-                    </Link>
+            <SidebarHeader className="p-4 group-data-[collapsible=icon]:p-2 flex justify-center items-center">
 
-                    {/* TRIGGER */}
-                    <SidebarTrigger className="shrink-0 size-8 hover:bg-gray-600 transition cursor-pointer" />
-                </div>
+                {/* LOGO */}
+                <Link to="/" className="flex flex-col items-center justify-center gap-2 group-data-[collapsible=icon]:hidden">
+                    <span className="text-3xl font-bold tracking-tight">
+                        Journet
+                    </span>
+                    <hr className="border-white w-full" />
+                </Link>
+
+                {/* TRIGGER */}
             </SidebarHeader>
 
             {/* SEPARADOR COLAPSABLE */}
@@ -110,7 +108,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             {/* PERFIL*/}
-            <SidebarFooter className="">
+            <SidebarFooter className="flex items-center">
                 <SidebarMenu>
                     <SidebarMenuItem className={"w-full flex justify-center"}>
                         <DropdownMenu>
@@ -120,8 +118,8 @@ export function AppSidebar() {
                                      group-data-[collapsible=icon]:justify-center cursor-pointer"
                                 >
                                     {/* USER INFO */}
-                                    <div className="flex items-center gap-3 w-full justify-between">
-                                        <Avatar size="lg" className="shrink-0 group-data-[collapsible=icon]:size-8"
+                                    <div className="flex items-center gap-3 w-full justify-center">
+                                        <Avatar size="sm" className="shrink-0 group-data-[collapsible=icon]:size-8"
                                         >
                                             <AvatarImage
                                                 alt="Pedro Suárez"
@@ -176,7 +174,7 @@ export function AppSidebar() {
 
                                 <DropdownMenuItem asChild>
                                     {/* <Link to="/profile"> */}
-                                        Ver perfil
+                                    Ver perfil
                                     {/* </Link> */}
                                 </DropdownMenuItem>
 
@@ -194,6 +192,8 @@ export function AppSidebar() {
                         </DropdownMenu>
                     </SidebarMenuItem>
                 </SidebarMenu>
+                <SidebarTrigger className="shrink-0 size-8 hover:bg-gray-600 transition cursor-pointer" />
+
             </SidebarFooter>
         </Sidebar >
     );
