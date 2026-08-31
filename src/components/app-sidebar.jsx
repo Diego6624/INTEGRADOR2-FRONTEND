@@ -117,8 +117,8 @@ export function AppSidebar() {
                         <DropdownMenu>
                             {/* BOTÓN DEL PERFIL */}
                             <DropdownMenuTrigger asChild>
-                                <SidebarMenuButton className="h-16 group-data-[collapsible=icon]:border-none w-full justify-between px-3 group-data-[collapsible=icon]:h-10
-                                     group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 cursor-pointer"
+                                <SidebarMenuButton className="h-16 group-data-[collapsible=icon]:border-none w-full justify-between group-data-[collapsible=icon]:h-10
+                                     group-data-[collapsible=icon]:justify-center cursor-pointer"
                                 >
                                     {/* USER INFO */}
                                     <div className="flex items-center gap-3 w-full justify-between">

@@ -15,7 +15,7 @@ export default function Layout({ children }) {
                 <AppSidebar />
                 <SidebarInset className={'bg-transparent'}>
                         <Header />
-                        <main className={`p-2`}>
+                        <main className={`p-2 pt-4`}>
                             {children}
                         </main>
                 </SidebarInset>
