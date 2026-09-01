@@ -36,7 +36,7 @@ export function AppSidebar() {
         <Sidebar
             collapsible="icon"
             variant="floating"
-            className="flex flex-col justify-center min-w-min"
+            className="flex flex-col justify-center min-w-min top-2"
         >
             {/* HEADER */}
             <SidebarHeader className="p-4 group-data-[collapsible=icon]:p-2 flex justify-center items-center">

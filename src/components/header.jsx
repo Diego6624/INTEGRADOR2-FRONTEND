@@ -3,10 +3,11 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuShortcut, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "@base-ui/react";
+import { Link } from "react-router-dom";
 
 export function Header() {
     return (
-        <header className="bg-[#2F2F2FCC] sticky top-0 z-10 flex flex-row justify-between w-full gap-2 py-5 px-6 border-b border-border rounded-3xl items-center">
+        <header className="bg-[#2F2F2FCC] sticky top-4 z-10 flex flex-row justify-between gap-2 py-5 px-6 border-b border-border rounded-3xl items-center">
             <h1 className="text-3xl">Bienvenido Usuario</h1>
 
             <div className="flex flex-row justify-between gap-7">
@@ -38,10 +39,12 @@ export function Header() {
                     </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Avatar size="lg">
-                    <AvatarImage alt="USER" className={'bg-blue-500'} />
-                    <AvatarFallback className={'bg-blue-500 text-white'}>PS</AvatarFallback>
-                </Avatar>
+                <Link to={'/profile'}>
+                    <Avatar size="lg">
+                        <AvatarImage alt="USER" className={'bg-blue-500'} />
+                        <AvatarFallback className={'bg-blue-500 text-white'}>PS</AvatarFallback>
+                    </Avatar>
+                </Link>
             </div>
 
         </header>
