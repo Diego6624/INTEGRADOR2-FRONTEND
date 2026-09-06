@@ -8,6 +8,7 @@ import Chats from "@/pages/private/Chats";
 import App from "@/App";
 import Registro from "@/pages/public/Registro/Registro";
 import { Profile } from "@/pages/private/profile/Profile";
+import Test from "@/pages/private/Test/test";
 
 
 const router = createBrowserRouter(
@@ -23,6 +24,7 @@ const router = createBrowserRouter(
                 <Route path="/agent" element={<AgenteIA />} />
                 <Route path="/chat" element={<Chats />} />
                 <Route path="/profile" element={<Profile/>}/>
+                <Route path="/test" element={<Test/>}/>
             </Route>
 
         </>

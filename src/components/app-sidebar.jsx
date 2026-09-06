@@ -1,4 +1,4 @@
-import { Brain, ChevronRight, Map, MessageCircle, Users } from "lucide-react";
+import { Brain, ChevronRight, Map, MessageCircle, Users, ClipboardCheck } from "lucide-react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
     Sidebar,
@@ -27,6 +27,7 @@ const projects = [
     { name: "Roadmap", icon: Map, url: "/roadmap" },
     { name: "Agente IA", icon: Brain, url: "/agent" },
     { name: "Chats", icon: MessageCircle, url: "/chat" },
+    { name: "Test vocacional", icon: ClipboardCheck, url: "/test" },
 ];
 
 export function AppSidebar() {
