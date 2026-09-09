@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Mail, User } from 'lucide-react'
-import CampoContrasena from '../../Inicio/components/CampoContrasena'
+import CampoContrasena from '../../Login/components/CampoContrasena'
 import { Link } from 'react-router-dom'
 
 export default function FormularioRegistro() {
@@ -66,7 +66,7 @@ export default function FormularioRegistro() {
         Acepto los términos y condiciones
       </label>
 
-      <Link to={"/"} className='flex w-full'>
+      <Link to={"/forum"} className='flex w-full'>
         <button type="submit" className="h-11 w-full rounded-lg bg-gradient-to-r from-[#40a9e6] to-[#3d7de3] font-bold text-white transition hover:brightness-110">
           Crear cuenta
         </button>
@@ -79,7 +79,7 @@ export default function FormularioRegistro() {
       </button>
       <p className="text-center text-sm text-[#aaa5b0]">
         ¿Ya tienes cuenta?{' '}
-        <a href="/" className="text-[#3da3ee] hover:underline">
+        <a href="/login" className="text-[#3da3ee] hover:underline">
           Inicia sesión
         </a>
       </p>
