@@ -340,29 +340,27 @@ export function AppSidebar() {
 
 
                                 {/* VER PERFIL */}
-
-                                <DropdownMenuItem>
-                                    Ver perfil
-                                </DropdownMenuItem>
-
+                                <Link to={"/profile"} className="w-full h-full">
+                                    <DropdownMenuItem className="w-full h-full cursor-pointer">
+                                        Ver perfil
+                                    </DropdownMenuItem>
+                                </Link>
 
                                 <DropdownMenuSeparator />
 
 
                                 {/* CERRAR SESIÓN */}
 
-                                <DropdownMenuItem
-                                    className="
-                                        text-red-500
-                                        focus:text-red-500
-                                        cursor-pointer
-                                    "
-                                    onClick={() => {
-                                        console.log("Cerrar sesión");
-                                    }}
-                                >
-                                    Cerrar sesión
-                                </DropdownMenuItem>
+                                <Link to={"/"} className="w-full h-full">
+                                    <DropdownMenuItem
+                                        className="text-red-500 focus:text-red-500 w-full h-full cursor-pointer"
+                                        onClick={() => {
+                                            console.log("Cerrar sesión");
+                                        }}
+                                    >
+                                        Cerrar sesión
+                                    </DropdownMenuItem>
+                                </Link>
 
                             </DropdownMenuContent>
 
