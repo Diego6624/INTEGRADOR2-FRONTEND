@@ -1,9 +1,25 @@
+/* TAILWINDCSS */
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
 @import "tailwindcss";
+/* TYPOGRAPHY */
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/fraunces";
+@import "@fontsource/roboto/400.css";
+@import "@fontsource/roboto/700.css";
+@import "@fontsource/poppins";
+@import "@fontsource/barlow";
+@import "@fontsource/outfit";
 
 @custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-fraunces: "Fraunces", serif;
+  --font-roboto: "Roboto", sans-serif;
+  --font-poppins: "Poppins", sans-serif;
+  --font-barlow: "Barlow", sans-serif;
+  --font-outfit: "Outfit", sans-serif;
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -117,4 +133,18 @@
   html {
     @apply font-sans;
   }
+}
+
+/* LOOP ReviewsHome.jsx */
+@keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+    animation: marquee 40s linear infinite;
+}
+
+html {
+    scroll-behavior: smooth;
 }
