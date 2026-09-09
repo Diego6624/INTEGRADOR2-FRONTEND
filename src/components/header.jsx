@@ -4,29 +4,25 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuShortcut, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "@base-ui/react";
 import { Link } from "react-router-dom";
-import { SidebarTrigger } from "./ui/sidebar";
 
 export function Header() {
     return (
-        <header className="bg-[#2F2F2FCC] backdrop-blur-md sticky top-2 sm:top-4 z-20 flex flex-row justify-between gap-2 sm:gap-4 py-3 sm:py-4 px-3 sm:px-6 border border-white/10 rounded-2xl sm:rounded-3xl items-center shadow-lg">
-            {/* Izquierda: Botón Sidebar móvil + Título */}
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                <SidebarTrigger className="text-white hover:bg-white/10 cursor-pointer shrink-0" />
-                <h1 className="text-sm sm:text-xl md:text-2xl lg:text-3xl font-bold text-white truncate">
-                    Bienvenido Usuario
-                </h1>
-            </div>
+        <header className="bg-[#2F2F2FCC] sticky top-4 z-10 flex flex-row flex-wrap justify-between items-center gap-2 sm:gap-3
+            py-3 sm:py-5 px-4 sm:px-6 border-b border-border rounded-2xl sm:rounded-3xl
+            pl-14 md:pl-6">
+            {/* pl-14 en mobile deja espacio para el botón flotante que abre el sidebar
+                (fixed, md:hidden) definido en Layout.jsx, para que no tape el título */}
+            <h1 className="text-lg sm:text-2xl lg:text-3xl truncate min-w-0 flex-1">
+                Bienvenido Usuario
+            </h1>
 
-            {/* Derecha: Buscador + Notificaciones + Perfil */}
-            <div className="flex items-center gap-2 sm:gap-4 md:gap-6 shrink-0">
-                <div className="hidden sm:block w-36 md:w-52 lg:w-64">
-                    <InputGroup className="bg-white/5 border border-white/10 rounded-xl focus-within:border-[#3DAAED]">
-                        <InputGroupInput placeholder="Buscar..." className="text-white placeholder:text-gray-400 text-sm" />
-                        <InputGroupAddon className="text-gray-400">
-                            <SearchIcon className="h-4 w-4" />
-                        </InputGroupAddon>
-                    </InputGroup>
-                </div>
+            <div className="flex flex-row items-center gap-2 sm:gap-4 lg:gap-7 shrink-0">
+                <InputGroup className={'bg-transparent hidden sm:flex w-40 md:w-56 lg:w-64'}>
+                    <InputGroupInput placeholder="Buscar..." />
+                    <InputGroupAddon>
+                        <SearchIcon />
+                    </InputGroupAddon>
+                </InputGroup>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger
@@ -52,11 +48,9 @@ export function Header() {
                 </DropdownMenu>
 
                 <Link to={'/profile'} className="shrink-0">
-                    <Avatar size="default" className="ring-2 ring-white/20">
-                        <AvatarImage alt="USER" className="bg-blue-500" />
-                        <AvatarFallback className="bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-semibold text-xs sm:text-sm">
-                            PS
-                        </AvatarFallback>
+                    <Avatar size="lg" className="size-8 sm:size-10">
+                        <AvatarImage alt="USER" className={'bg-blue-500'} />
+                        <AvatarFallback className={'bg-blue-500 text-white'}>PS</AvatarFallback>
                     </Avatar>
                 </Link>
             </div>
