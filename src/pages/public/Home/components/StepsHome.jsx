@@ -6,7 +6,7 @@ const steps = [
     },
     {
         number: "02",
-        title: "Crear tu perfil",
+        title: "Crea tu perfil",
         description: "Regístrate e ingresa tus datos universitarios para personalizar tu experiencia.",
     },
     {
@@ -23,44 +23,48 @@ const steps = [
 
 const StepsHome = () => {
     return (
-        <section id="como-funciona" className="scroll-mt-20 w-full h-[90vh] bg-white flex flex-col justify-center items-center gap-8 px-8 md:px-40 py-20 overflow-hidden">
-            {/* Header */}
-            <div className="text-center flex flex-col gap-3">
-                <h2 className="text-4xl md:text-6xl font-bold font-fraunces text-gray-900">
-                    Empieza en cuatro pasos.
-                </h2>
-                <p className="text-gray-500 text-sm md:text-lg max-w-lg mx-auto font-roboto">
-                    Deberás completar esta serie de pasos para comenzar tu nuevo viaje
-                    universitario lleno de retos y objetivos
-                </p>
-            </div>
+        <section id="como-funciona" className="scroll-mt-20 w-full min-h-fit bg-[#FAFAFA] flex flex-col justify-center items-center px-4 sm:px-8 md:px-12 lg:px-20 py-16 sm:py-20 md:py-28">
+            <div className="w-full max-w-6xl mx-auto flex flex-col items-center">
+                {/* Header */}
+                <div className="text-center flex flex-col gap-2 sm:gap-3 max-w-2xl px-2">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-fraunces text-gray-900 leading-tight">
+                        Empieza en cuatro pasos
+                    </h2>
+                    <p className="text-gray-600 text-sm sm:text-base md:text-lg font-roboto mt-1">
+                        Sigue estos sencillos pasos para iniciar tu nuevo viaje universitario lleno de retos y objetivos.
+                    </p>
+                </div>
 
-            {/* Steps */}
-            <div className="w-full grid grid-cols-1 md:grid-cols-4 gap-8 mt-8">
-                {steps.map((step) => (
-                    <div key={step.number} className="flex flex-col items-center text-center gap-5 group">
-                        {/* Número */}
-                        <span className="text-7xl md:text-8xl font-bold font-fraunces text-[#3E54A0] group-hover:text-[#4D88F4] transition duration-300 cursor-default">
-                            {step.number}
-                        </span>
+                {/* Steps Grid */}
+                <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-6 lg:gap-8 mt-10 sm:mt-14">
+                    {steps.map((step) => (
+                        <div
+                            key={step.number}
+                            className="flex flex-col items-center text-center gap-3 sm:gap-4 p-5 sm:p-4 rounded-2xl bg-white sm:bg-transparent shadow-sm sm:shadow-none border sm:border-none border-gray-100 group transition-all duration-300"
+                        >
+                            {/* Número */}
+                            <span className="text-6xl sm:text-7xl md:text-8xl font-bold font-fraunces text-[#3E54A0] group-hover:text-[#4D88F4] transition-colors duration-300 cursor-default select-none">
+                                {step.number}
+                            </span>
 
-                        {/* Línea con punto */}
-                        <div className="relative w-full flex items-center justify-center">
-                            <div className="absolute w-full h-px bg-[#C5C5E8]" />
-                            <div className="relative z-10 w-3 h-3 rounded-full bg-[#051AE2]/47 group-hover:bg-[#4D88F4] transition duration-300" />
+                            {/* Línea conectora (visible en desktop) y punto */}
+                            <div className="relative w-full flex items-center justify-center my-1">
+                                <div className="hidden md:block absolute w-full h-px bg-[#C5C5E8]" />
+                                <div className="relative z-10 w-3.5 h-3.5 rounded-full bg-[#3E54A0]/60 group-hover:bg-[#4D88F4] group-hover:scale-125 transition-all duration-300" />
+                            </div>
+
+                            {/* Texto */}
+                            <div className="flex flex-col gap-1.5 sm:gap-2">
+                                <h3 className="font-bold font-roboto text-gray-900 text-lg sm:text-base md:text-lg cursor-default">
+                                    {step.title}
+                                </h3>
+                                <p className="text-gray-600 text-sm font-roboto leading-relaxed cursor-default">
+                                    {step.description}
+                                </p>
+                            </div>
                         </div>
-
-                        {/* Texto */}
-                        <div className="flex flex-col gap-2">
-                            <h3 className="font-bold font-roboto text-gray-900 text-base cursor-default">
-                                {step.title}
-                            </h3>
-                            <p className="text-gray-500 text-sm font-roboto leading-relaxed cursor-default">
-                                {step.description}
-                            </p>
-                        </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
         </section>
     );

@@ -8,9 +8,9 @@ import StepsHome from "./components/StepsHome";
 
 const Home = () => {
     return (
-        <div className="flex flex-col min-h-dvh bg-white">
+        <div className="flex flex-col min-h-dvh bg-white w-full overflow-x-hidden">
             <NavbarComponent />
-            <main className="flex-1">
+            <main className="flex-1 w-full">
                 <HeroHome />
                 <StatsBar />
                 <InfoHome />

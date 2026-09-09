@@ -15,19 +15,19 @@ const InfoHome = () => {
     ];
 
     return (
-        <section id="caracteristicas" className="scroll-mt-20 w-full h-[90vh] bg-white flex flex-col justify-center items-center gap-8 px-8 md:px-40 py-20 overflow-hidden">
-            <div className="grid md:grid-cols-2 gap-8 items-center justify-center">
+        <section id="caracteristicas" className="scroll-mt-20 w-full min-h-fit bg-white flex flex-col justify-center items-center px-4 sm:px-8 md:px-12 lg:px-24 xl:px-36 py-16 sm:py-20 md:py-28">
+            <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-14 items-center">
                 {/* Content */}
-                <div className="flex flex-col gap-6">
-                    {/* Título */}
-                    <div
-                        className="text-5xl font-bold text-gray-900 md:flex hidden"
-                    >
-                        Todo lo que necesitas, en un solo lugar
+                <div className="flex flex-col gap-6 sm:gap-8">
+                    {/* Título unificado */}
+                    <div className="flex flex-col gap-2">
+                        <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold font-fraunces text-gray-900 leading-tight">
+                            Todo lo que necesitas, en un solo lugar
+                        </h2>
                     </div>
 
                     {/* Lista de Valores */}
-                    <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-4 sm:gap-6">
                         {values.map((value, index) => (
                             <div
                                 key={index}
@@ -51,15 +51,10 @@ const InfoHome = () => {
                     </div>
                 </div>
 
-                {/* Text Responsive */}
-                <div className="text-3xl font-bold text-gray-900 md:hidden flex justify-center">
-                    Todo lo que necesitas, en un solo lugar
-                </div>
-
                 {/* Image */}
-                <div className="w-full h-full flex justify-center">
-                    <div className="relative w-full max-w-lg">
-                        {/* IMAGEN */}
+                <div className="w-full flex justify-center items-center">
+                    <div className="relative w-full max-w-md lg:max-w-lg">
+                        <div className="absolute -inset-2 bg-gradient-to-r from-[#3DAAED]/20 to-[#3E54A0]/20 rounded-3xl blur-xl" />
                         <img
                             src="/images/infoHomeImage.png"
                             alt="image"
@@ -71,4 +66,5 @@ const InfoHome = () => {
         </section>
     );
 };
+
 export default InfoHome;
