@@ -40,23 +40,23 @@ export function Profile() {
 
                     </CardAction>
                 </CardHeader>
-                <CardFooter className={'flex justify-around'}>
-                    <div className="flex justify-between gap-2 items-center">
+                <CardFooter className={'grid grid-cols-2 gap-2'}>
+                    <div className="flex gap-2 items-center justify-center">
                         <span className="text-xl font-bold">4</span>
                         <span>Hilos creados</span>
                     </div>
 
-                    <div className="flex justify-between gap-2 items-center">
+                    <div className="flex gap-2 items-center justify-center">
                         <span className="text-xl font-bold">18</span>
                         <span>Respuestas</span>
                     </div>
 
-                    <div className="flex justify-between gap-2 items-center">
+                    <div className="flex gap-2 items-center justify-center">
                         <span className="text-xl font-bold">67</span>
                         <span>Votos recibidos</span>
                     </div>
 
-                    <div className="flex justify-between gap-2 items-center">
+                    <div className="flex gap-2 items-center justify-center">
                         <span className="text-xl font-bold">2</span>
                         <span>Roadmaps</span>
                     </div>
