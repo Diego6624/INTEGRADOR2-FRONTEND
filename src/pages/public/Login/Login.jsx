@@ -1,7 +1,7 @@
 import FormularioInicio from './components/FormularioInicio'
 import imagen from '../../../assets/InicioS.png'
 
-export default function Inicio() {
+export default function Login() {
   return (
     <main className="flex min-h-screen flex-col bg-[#241e2b] lg:h-screen lg:flex-row lg:overflow-hidden">
       { }

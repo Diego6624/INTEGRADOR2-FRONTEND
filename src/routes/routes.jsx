@@ -1,6 +1,6 @@
 import { createBrowserRouter, createRoutesFromElements, Route } from "react-router-dom";
-import Home from "../pages/public/Home";
-import Inicio from "../pages/public/Inicio/inicio";
+import Home from "../pages/public/Home/Home";
+import Inicio from "../pages/public/Login/Login";
 import Forum from "@/pages/private/forum/Forum";
 import Roadmap from "@/pages/private/Roadmap";
 import AgenteIA from "@/pages/private/Agente IA";
@@ -14,11 +14,10 @@ import Test from "@/pages/private/Test/test";
 const router = createBrowserRouter(
     createRoutesFromElements(
         <>
-            <Route path="/" element={<Inicio />} />
+            <Route path="/" index element={<Home />} />
+            <Route path="/login" element={<Inicio />} />
             <Route path="/register" element={<Registro />} />
-
             <Route element={<App />}>
-                <Route path="/home" element={<Home />} />
                 <Route path="/forum" element={<Forum />} />
                 <Route path="/roadmap" element={<Roadmap />} />
                 <Route path="/agent" element={<AgenteIA />} />
