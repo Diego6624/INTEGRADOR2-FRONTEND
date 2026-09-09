@@ -4,23 +4,22 @@ import { Header } from './components/header'
 import background from '@/assets/background.jpg'
 
 export default function Layout({ children }) {
-    return (<>
+    return (
         <div
-            className='bg-cover bg-center p-2 max-h-min w-full'
+            className="bg-cover bg-center bg-fixed min-h-screen w-full p-2 sm:p-4"
             style={{
                 backgroundImage: `url(${background})`,
             }}
         >
             <SidebarProvider defaultOpen={true}>
                 <AppSidebar />
-                <SidebarInset className={'bg-transparent'}>
-                        <Header />
-                        <main className={`p-2 pt-4`}>
-                            {children}
-                        </main>
+                <SidebarInset className="bg-transparent min-w-0 overflow-x-hidden">
+                    <Header />
+                    <main className="p-1 sm:p-2 pt-3 sm:pt-4 min-w-0">
+                        {children}
+                    </main>
                 </SidebarInset>
-
             </SidebarProvider>
         </div>
-    </>)
+    );
 }

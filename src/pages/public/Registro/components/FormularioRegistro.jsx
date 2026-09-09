@@ -66,7 +66,7 @@ export default function FormularioRegistro() {
         Acepto los términos y condiciones
       </label>
 
-      <Link to={"/forum"} className='flex w-full'>
+      <Link to={"/login"} className='flex w-full'>
         <button type="submit" className="h-11 w-full rounded-lg bg-gradient-to-r from-[#40a9e6] to-[#3d7de3] font-bold text-white transition hover:brightness-110">
           Crear cuenta
         </button>
