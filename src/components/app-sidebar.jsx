@@ -1,5 +1,14 @@
-import { Brain, ChevronRight, Map, MessageCircle, Users } from "lucide-react";
+import {
+    Brain,
+    ChevronRight,
+    Map,
+    MessageCircle,
+    Users,
+    ClipboardCheck
+} from "lucide-react";
+
 import { TooltipProvider } from "@/components/ui/tooltip";
+
 import {
     Sidebar,
     SidebarContent,
@@ -12,24 +21,37 @@ import {
     SidebarMenuItem,
     SidebarTrigger
 } from "./ui/sidebar";
+
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
-    DropdownMenuTrigger,
+    DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+
 import { Link, useLocation } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage
+} from "@/components/ui/avatar";
+
 
 const projects = [
     { name: "Foro", icon: Users, url: "/forum" },
     { name: "Roadmap", icon: Map, url: "/roadmap" },
     { name: "Agente IA", icon: Brain, url: "/agent" },
     { name: "Chats", icon: MessageCircle, url: "/chat" },
+
+    // CAMBIO DE ANDY
+    { name: "Test vocacional", icon: ClipboardCheck, url: "/test" },
 ];
 
+
 export function AppSidebar() {
+
     const { pathname } = useLocation();
 
     return (
@@ -38,129 +60,204 @@ export function AppSidebar() {
             variant="floating"
             className="flex flex-col justify-center min-w-min top-2"
         >
+
+            {/* ============================= */}
             {/* HEADER */}
-            <SidebarHeader className="p-4 group-data-[collapsible=icon]:p-2 flex justify-center items-center">
+            {/* ============================= */}
+
+            <SidebarHeader
+                className="
+                    p-4
+                    group-data-[collapsible=icon]:p-2
+                    flex
+                    justify-center
+                    items-center
+                "
+            >
 
                 {/* LOGO */}
-                <Link to="/home" className="flex flex-col items-center justify-center gap-2 group-data-[collapsible=icon]:hidden">
+
+                <Link
+                    to="/home"
+                    className="
+                        flex
+                        flex-col
+                        items-center
+                        justify-center
+                        gap-2
+                        group-data-[collapsible=icon]:hidden
+                    "
+                >
                     <span className="text-3xl font-bold tracking-tight">
                         Journet
                     </span>
+
                     <hr className="border-white w-full" />
                 </Link>
 
-                {/* TRIGGER */}
             </SidebarHeader>
 
+
+            {/* ============================= */}
             {/* SEPARADOR COLAPSABLE */}
-            <div className="group-data-[collapsible=icon]:flex w-full justify-center hidden">
+            {/* ============================= */}
+
+            <div
+                className="
+                    group-data-[collapsible=icon]:flex
+                    w-full
+                    justify-center
+                    hidden
+                "
+            >
                 <hr className="border-white w-[80%]" />
             </div>
 
+
+            {/* ============================= */}
             {/* NAVEGACIÓN */}
-            <SidebarContent className="px-2 group-data-[collapsible=icon]:px-0.5">
+            {/* ============================= */}
+
+            <SidebarContent
+                className="
+                    px-2
+                    group-data-[collapsible=icon]:px-0.5
+                "
+            >
+
                 <SidebarGroup className="gap-1">
 
                     {/* LABEL */}
+
                     <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
                         Principal
                     </SidebarGroupLabel>
 
-                    {/* MAP RUTAS */}
+
+                    {/* RUTAS */}
+
                     <TooltipProvider delayDuration={300}>
+
                         <SidebarMenu className="gap-1">
+
                             {projects.map((project) => (
+
                                 <SidebarMenuItem key={project.name}>
+
                                     <SidebarMenuButton
                                         render={<Link to={project.url} />}
                                         isActive={pathname === project.url}
                                         tooltip={project.name}
-                                        className="h-12 px-3 gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 
-                                            hover:bg-gray-600 transition"
+                                        className="
+                                            h-12
+                                            px-3
+                                            gap-3
+                                            group-data-[collapsible=icon]:justify-center
+                                            group-data-[collapsible=icon]:px-0
+                                            hover:bg-gray-600
+                                            transition
+                                        "
                                     >
+
                                         <project.icon className="size-5 shrink-0" />
 
                                         <span className="group-data-[collapsible=icon]:hidden">
                                             {project.name}
                                         </span>
+
                                     </SidebarMenuButton>
+
                                 </SidebarMenuItem>
+
                             ))}
+
                         </SidebarMenu>
+
                     </TooltipProvider>
+
                 </SidebarGroup>
 
+
+                {/* ============================= */}
                 {/* RECIENTES */}
+                {/* ============================= */}
+
                 <SidebarGroup>
 
-                    {/* LABEL */}
                     <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
                         Recientes
                     </SidebarGroupLabel>
 
-                    {/* MAP RUTAS */}
-                    {/* <TooltipProvider delayDuration={300}>
-                        <SidebarMenu className="gap-1">
-
-                        </SidebarMenu>
-                    </TooltipProvider> */}
                 </SidebarGroup>
+
             </SidebarContent>
 
-            {/* PERFIL*/}
+
+            {/* ============================= */}
+            {/* PERFIL */}
+            {/* ============================= */}
+
             <SidebarFooter className="flex items-center">
+
                 <SidebarMenu>
-                    <SidebarMenuItem className={"w-full flex justify-center"}>
+
+                    <SidebarMenuItem className="w-full flex justify-center">
+
                         <DropdownMenu>
+
+                            {/* ============================= */}
                             {/* BOTÓN DEL PERFIL */}
-                            <DropdownMenuTrigger asChild>
-                                <SidebarMenuButton className="h-16 group-data-[collapsible=icon]:border-none w-full justify-between group-data-[collapsible=icon]:h-10
-                                     group-data-[collapsible=icon]:justify-center cursor-pointer"
-                                >
-                                    {/* USER INFO */}
-                                    <div className="flex items-center gap-3 w-full justify-center">
-                                        <Avatar size="sm" className="shrink-0 group-data-[collapsible=icon]:size-8"
-                                        >
-                                            <AvatarImage
-                                                alt="Pedro Suárez"
-                                                className="bg-blue-500"
-                                            />
-                                            <AvatarFallback className="bg-blue-500 text-white">
-                                                PS
-                                            </AvatarFallback>
-                                        </Avatar>
+                            {/* ============================= */}
 
-                                        <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden"
-                                        >
-                                            <span className="text-sm">
-                                                Pedro Suárez
-                                            </span>
+                            <DropdownMenuTrigger
+                                render={
+                                    <SidebarMenuButton
+                                        className="
+                                            h-16
+                                            group-data-[collapsible=icon]:border-none
+                                            w-full
+                                            justify-between
+                                            group-data-[collapsible=icon]:h-10
+                                            group-data-[collapsible=icon]:justify-center
+                                            cursor-pointer
+                                        "
+                                    />
+                                }
+                            >
 
-                                            <span className="text-xs text-muted-foreground">
-                                                Ing. de sistemas
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <ChevronRight className="shrink-0 group-data-[collapsible=icon]:hidden" />
-                                </SidebarMenuButton>
-                            </DropdownMenuTrigger>
-                            {/* DROPDOWN */}
-                            <DropdownMenuContent side="left" align="end" className="w-full px-2">
-                                {/* INFORMACIÓN DEL USUARIO */}
-                                <div className="flex items-center gap-3 py-2 px-1">
-                                    <Avatar size="lg" className="shrink-0 group-data-[collapsible=icon]:size-8"
+                                {/* USER INFO */}
+
+                                <div className="flex items-center gap-3 w-full justify-center">
+
+                                    <Avatar
+                                        size="sm"
+                                        className="
+                                            shrink-0
+                                            group-data-[collapsible=icon]:size-8
+                                        "
                                     >
+
                                         <AvatarImage
                                             alt="Pedro Suárez"
                                             className="bg-blue-500"
                                         />
+
                                         <AvatarFallback className="bg-blue-500 text-white">
                                             PS
                                         </AvatarFallback>
+
                                     </Avatar>
 
-                                    <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden"
+
+                                    <div
+                                        className="
+                                            flex
+                                            flex-col
+                                            items-start
+                                            group-data-[collapsible=icon]:hidden
+                                        "
                                     >
+
                                         <span className="text-sm">
                                             Pedro Suárez
                                         </span>
@@ -168,35 +265,128 @@ export function AppSidebar() {
                                         <span className="text-xs text-muted-foreground">
                                             Ing. de sistemas
                                         </span>
+
                                     </div>
+
                                 </div>
+
+
+                                <ChevronRight
+                                    className="
+                                        shrink-0
+                                        group-data-[collapsible=icon]:hidden
+                                    "
+                                />
+
+                            </DropdownMenuTrigger>
+
+
+                            {/* ============================= */}
+                            {/* DROPDOWN */}
+                            {/* ============================= */}
+
+                            <DropdownMenuContent
+                                side="left"
+                                align="end"
+                                className="w-full px-2"
+                            >
+
+                                {/* INFORMACIÓN DEL USUARIO */}
+
+                                <div className="flex items-center gap-3 py-2 px-1">
+
+                                    <Avatar
+                                        size="lg"
+                                        className="
+                                            shrink-0
+                                            group-data-[collapsible=icon]:size-8
+                                        "
+                                    >
+
+                                        <AvatarImage
+                                            alt="Pedro Suárez"
+                                            className="bg-blue-500"
+                                        />
+
+                                        <AvatarFallback className="bg-blue-500 text-white">
+                                            PS
+                                        </AvatarFallback>
+
+                                    </Avatar>
+
+
+                                    <div
+                                        className="
+                                            flex
+                                            flex-col
+                                            items-start
+                                        "
+                                    >
+
+                                        <span className="text-sm">
+                                            Pedro Suárez
+                                        </span>
+
+                                        <span className="text-xs text-muted-foreground">
+                                            Ing. de sistemas
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
                                 <DropdownMenuSeparator />
 
-                                <DropdownMenuItem asChild>
-                                    {/* <Link to="/profile"> */}
+
+                                {/* VER PERFIL */}
+
+                                <DropdownMenuItem>
                                     Ver perfil
-                                    {/* </Link> */}
                                 </DropdownMenuItem>
 
+
                                 <DropdownMenuSeparator />
-                                
-                                <Link to={"/"} className="w-full h-full cursor-pointer">
-                                    <DropdownMenuItem
-                                        className="text-red-500 focus:text-red-500 w-full h-full"
-                                        onClick={() => {
-                                            console.log("Cerrar sesión");
-                                        }}
-                                    >
-                                        Cerrar sesión
-                                    </DropdownMenuItem>
-                                </Link>
+
+
+                                {/* CERRAR SESIÓN */}
+
+                                <DropdownMenuItem
+                                    className="
+                                        text-red-500
+                                        focus:text-red-500
+                                        cursor-pointer
+                                    "
+                                    onClick={() => {
+                                        console.log("Cerrar sesión");
+                                    }}
+                                >
+                                    Cerrar sesión
+                                </DropdownMenuItem>
+
                             </DropdownMenuContent>
+
                         </DropdownMenu>
+
                     </SidebarMenuItem>
+
                 </SidebarMenu>
-                <SidebarTrigger className="shrink-0 size-8 hover:bg-gray-600 transition cursor-pointer" />
+
+
+                {/* SIDEBAR TRIGGER */}
+
+                <SidebarTrigger
+                    className="
+                        shrink-0
+                        size-8
+                        hover:bg-gray-600
+                        transition
+                        cursor-pointer
+                    "
+                />
 
             </SidebarFooter>
-        </Sidebar >
+
+        </Sidebar>
     );
 }

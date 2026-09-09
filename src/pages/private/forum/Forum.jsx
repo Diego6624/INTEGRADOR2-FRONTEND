@@ -59,7 +59,6 @@ const INITIAL_CHATS = [
     },
 ]
 
-
 const INITIAL_MENTORES = [
     {
         "name": "Ana Lucía Vargas",
@@ -183,9 +182,8 @@ export default function Forum() {
                         </ItemFooter>
                     </Item>
 
-
                     {INITIAL_CHATS.map((chat) => (
-                        <Item variant="outline" className={'bg-black/70 backdrop-blur-xl border border-white/10 '}>
+                        <Item key={chat.id} variant="outline" className={'bg-black/70 backdrop-blur-xl border border-white/10 '}>
                             <ItemMedia className={'flex flex-col'}>
                                 <ChevronUp />
                                 <span className="text-sm">
@@ -195,7 +193,7 @@ export default function Forum() {
                             <ItemContent>
                                 <div className="flex flex-row gap-2">
                                     {chat.tags.map((tag) => (
-                                        <Badge variant="secondary">{tag}</Badge>
+                                        <Badge key={tag} variant="secondary">{tag}</Badge>
                                     ))}
                                 </div>
                                 <ItemTitle className={'font-semibold'}>{chat.title}</ItemTitle>
@@ -228,9 +226,7 @@ export default function Forum() {
                                             {chat.views}
                                         </span>
                                     </div>
-
                                 </div>
-
                             </ItemContent>
                         </Item>
                     ))}
@@ -248,8 +244,8 @@ export default function Forum() {
                                     </ItemTitle>
                                 </ItemContent>
                                 {
-                                    INITIAL_MENTORES.map((mentor) => (
-                                        <Item>
+                                    INITIAL_MENTORES.map((mentor, index) => (
+                                        <Item key={index}>
                                             <ItemMedia>
                                                 <Avatar className="size-10">
                                                     <AvatarImage src="https://github.com/evilrabbit.png" />
@@ -269,8 +265,6 @@ export default function Forum() {
                                     ))
                                 }
                             </Item>
-
-
                         </section>
 
                         <section className="rounded-3xl m-5 flex flex-col gap-2 items-center justify-center bg-black/70 backdrop-blur-md border border-white/10">
@@ -281,8 +275,8 @@ export default function Forum() {
                                     </ItemTitle>
                                 </ItemContent>
                                 {
-                                    POPULAR_ROADMAPS.map((roadmap) => (
-                                        <Item>
+                                    POPULAR_ROADMAPS.map((roadmap, index) => (
+                                        <Item key={index}>
                                             <ItemMedia variant="icon" className={'p-2 rounded-xl bg-[#1A2540]'}>
                                                 <MapIcon className="bg-[#1A2540]" size={64} />
                                             </ItemMedia>
@@ -298,10 +292,7 @@ export default function Forum() {
                                     <Link to={'/roadmap'} className="text-[#7C6DFF] flex flex-row items-center">Ver todos los roadmaps <ChevronRight /></Link>
                                 </ItemFooter>
                             </Item>
-
-
                         </section>
-
 
                         <section className="rounded-3xl m-5 flex flex-col gap-2 items-center justify-center bg-black/70 backdrop-blur-md border border-white/10">
                             <Item>
@@ -313,7 +304,7 @@ export default function Forum() {
                                 <div className="grid grid-cols-2 gap-2">
                                     {
                                         INITIAL_DATA.map((data) => (
-                                            <Item variant="outline" className={'bg-[#1E2D4A]'}>
+                                            <Item key={data.number} variant="outline" className={'bg-[#1E2D4A]'}>
                                                 <ItemContent>
                                                     <ItemTitle className={'text-xl text-white font-bold'}>{data.number}</ItemTitle>
                                                     <ItemDescription>{data.content}</ItemDescription>
@@ -323,13 +314,10 @@ export default function Forum() {
                                     }
                                 </div>
                             </Item>
-
-
                         </section>
                     </ResizablePanel>
                 </ResizablePanelGroup>
             </ResizablePanel>
         </ResizablePanelGroup>
-
     )
 }
