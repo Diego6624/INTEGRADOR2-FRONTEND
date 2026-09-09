@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { ChevronLeft, ClipboardCheck, Clock3, ListChecks } from 'lucide-react'
-import BarraProgreso from './components/BarraProgreso'
-import PreguntaCard from './components/PreguntaCard'
-import ResultadoTest from './components/ResultadoTest'
+import BarraProgreso from './components/Barraprogreso'
+import PreguntaCard from './components/Preguntacard'
+import ResultadoTest from './components/Resultadotest'
 
 const AREAS = {
   ciencias: {
