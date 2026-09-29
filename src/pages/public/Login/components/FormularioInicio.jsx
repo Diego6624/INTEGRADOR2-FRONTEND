@@ -1,19 +1,54 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { Mail } from 'lucide-react'
 import CampoContrasena from './CampoContrasena'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import apiFetch from '@/lib/apiClient'
+import { AuthContext } from '@/context/AuthContext'
 
 export default function FormularioInicio() {
   const [correo, setCorreo] = useState('')
   const [contrasena, setContrasena] = useState('')
   const [recordarme, setRecordarme] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  function manejarEnvio(evento) {
+  const navigate = useNavigate()
+
+  const {verificarSesion} = useContext(AuthContext)
+
+  async function manejarEnvio(evento) {
+
     evento.preventDefault()
 
+    setError('')
+    setLoading(true)
+
+    try {
+      await apiFetch.post("/login", {
+        email: correo,
+        password: contrasena
+      })
+
+      await verificarSesion()
+
+      navigate('/forum')
+
+    } catch (err) {
+
+      console.log(err)
+      if (err.response?.status === 401) {
+        setError('Correo o contraseña incorrectos')
+      } else {
+        setError('No se pudo iniciar sesión. Intentalo nuevamente')
+      }
+
+    } finally {
+      setLoading(false)
+    }
+
+
+
     console.log({
-      correo,
-      contrasena,
       recordarme,
     })
   }
@@ -57,11 +92,17 @@ export default function FormularioInicio() {
         Recuérdame
       </div>
 
-      <Link to="/forum" className="flex w-full">
-        <button type="submit" className="h-12 w-full rounded-lg bg-gradient-to-r from-[#40a9e6] to-[#3d7de3] font-bold text-white transition hover:brightness-110">
-          Ingresar
-        </button>
-      </Link>
+      {
+        error && (
+          <p className='text-center text-sm text-red-400'>
+            {error}
+          </p>
+        )
+      }
+
+      <button type="submit" disabled={loading} className="disabled:cursor-not-allowed  h-12 w-full rounded-lg bg-gradient-to-r from-[#40a9e6] to-[#3d7de3] font-bold text-white transition hover:brightness-110">
+        {loading ? 'Ingresando ...': 'Ingresar'}
+      </button>
 
 
       <div className="border-t border-white/40" />

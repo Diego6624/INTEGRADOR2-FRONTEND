@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Mail, User } from 'lucide-react'
 import CampoContrasena from '../../Login/components/CampoContrasena'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import apiFetch from '@/lib/apiClient'
 
 export default function FormularioRegistro() {
   const [nombre, setNombre] = useState('')
@@ -9,21 +10,37 @@ export default function FormularioRegistro() {
   const [contrasena, setContrasena] = useState('')
   const [confirmarContrasena, setConfirmarContrasena] = useState('')
   const [aceptaTerminos, setAceptaTerminos] = useState(false)
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
 
-  function manejarEnvio(evento) {
+  async function manejarEnvio(evento) {
     evento.preventDefault()
 
     if (contrasena !== confirmarContrasena) {
-      console.log('Las contraseñas no coinciden')
+      setError('Las contraseñas no coinciden')
       return
     }
 
-    console.log({
-      nombre,
-      correo,
-      contrasena,
-      aceptaTerminos,
-    })
+    if (aceptaTerminos !== true) {
+      setError("Debe aceptar los términos y condiciones")
+      return
+    }
+
+
+    try {
+      await apiFetch.post("/register", {
+        name: nombre,
+        email: correo,
+        password: contrasena
+      })
+
+      navigate('/login')
+
+    } catch (err) {
+      console.error(err)
+      setError('Error al crear cuenta')
+    }
+
   }
 
   return (
@@ -65,12 +82,17 @@ export default function FormularioRegistro() {
         </div>
         Acepto los términos y condiciones
       </label>
+      {
+        error && (
+          <p className='text-center text-sm text-red-400'>
+            {error}
+          </p>
+        )
+      }
 
-      <Link to={"/login"} className='flex w-full'>
-        <button type="submit" className="h-11 w-full rounded-lg bg-gradient-to-r from-[#40a9e6] to-[#3d7de3] font-bold text-white transition hover:brightness-110">
-          Crear cuenta
-        </button>
-      </Link>
+      <button type="submit" className="h-11 w-full rounded-lg bg-gradient-to-r from-[#40a9e6] to-[#3d7de3] font-bold text-white transition hover:brightness-110">
+        Crear cuenta
+      </button>
 
       <div className="border-t border-white/40" />
       <button type="button" className="flex h-11 items-center justify-center gap-3 rounded-lg bg-[#505052] text-white hover:brightness-110">
