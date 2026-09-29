@@ -16,7 +16,7 @@ export default function CampoContrasena({
       <div className="flex h-16 items-center gap-3 rounded-lg bg-[#f1f1f3] px-4">
         <LockKeyhole className="text-[#77747b]" size={19} />
 
-        <input id="contrasena" type={mostrar ? 'text' : 'password'} value={valor}
+        <input id="contrasena" type={mostrar ? 'text' : 'password'} pattern='^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!_-]).{8,}$' value={valor}
           onChange={(evento) =>
             cambiarValor(evento.target.value)
           }

@@ -590,8 +590,7 @@ function FullStackCard({ statuses, onStatusChange }) {
       borderRadius: 16, overflow: 'hidden',
     }}>
       {/* Card header */}
-      <div style={{
-        display: 'flex', alignItems: 'start',
+      <div className='flex items-start, gap-16 p-20 overflow-auto' style={{
         gap: 16, padding: '20px 20px 0',
       }}>
         {/* Icon */}
