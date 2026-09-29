@@ -20,6 +20,7 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
         verificarSesion()
+        // eslint-disable-next-line react-hooks/set-state-in-effect
     }, [])
 
 
