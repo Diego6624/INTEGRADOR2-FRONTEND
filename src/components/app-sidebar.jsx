@@ -19,8 +19,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 const projects = [
     { name: "Foro", icon: Users, url: "/forum" },
@@ -39,99 +41,141 @@ const projects = [
 export function AppSidebar() {
 
     const { pathname } = useLocation();
+    const navigate = useNavigate()
+    const { cerrarSesion } = useContext(AuthContext)
+
+
+    const handleLogout = async () => {
+        try {
+            await cerrarSesion()
+            navigate("/")
+
+        } catch (err) {
+            console.error('Logout error: ', err)
+        }
+    }
 
     return (
         <>
-        <Sidebar
-            collapsible="icon"
-            variant="floating"
-            // En mobile el panel se abre como off-canvas (drawer) a ancho completo del componente Sidebar;
-            // en escritorio respeta el ancho configurado por el primitive.
-            style={{ "--sidebar-width-mobile": "17rem" }}
-            className="flex flex-col justify-center min-w-min top-2"
-        >
-            {/* HEADER */}
-            <SidebarHeader className="p-3 sm:p-4 group-data-[collapsible=icon]:p-2 flex justify-center items-center">
+            <Sidebar
+                collapsible="icon"
+                variant="floating"
+                // En mobile el panel se abre como off-canvas (drawer) a ancho completo del componente Sidebar;
+                // en escritorio respeta el ancho configurado por el primitive.
+                style={{ "--sidebar-width-mobile": "17rem" }}
+                className="flex flex-col justify-center min-w-min top-2"
+            >
+                {/* HEADER */}
+                <SidebarHeader className="p-3 sm:p-4 group-data-[collapsible=icon]:p-2 flex justify-center items-center">
 
-                {/* LOGO */}
-                <Link to="/" className="flex flex-col items-center justify-center gap-1.5 sm:gap-2 group-data-[collapsible=icon]:hidden">
-                    <span className="text-2xl sm:text-3xl font-bold tracking-tight">
-                        Journet
-                    </span>
-                    <hr className="border-white w-full" />
-                </Link>
+                    {/* LOGO */}
+                    <Link to="/" className="flex flex-col items-center justify-center gap-1.5 sm:gap-2 group-data-[collapsible=icon]:hidden">
+                        <span className="text-2xl sm:text-3xl font-bold tracking-tight">
+                            Journet
+                        </span>
+                        <hr className="border-white w-full" />
+                    </Link>
 
-                {/* TRIGGER */}
-            </SidebarHeader>
+                    {/* TRIGGER */}
+                </SidebarHeader>
 
-            {/* SEPARADOR COLAPSABLE */}
-            <div className="group-data-[collapsible=icon]:flex w-full justify-center hidden">
-                <hr className="border-white w-[80%]" />
-            </div>
+                {/* SEPARADOR COLAPSABLE */}
+                <div className="group-data-[collapsible=icon]:flex w-full justify-center hidden">
+                    <hr className="border-white w-[80%]" />
+                </div>
 
-            {/* NAVEGACIÓN */}
-            <SidebarContent className="px-1.5 sm:px-2 group-data-[collapsible=icon]:px-0.5">
-                <SidebarGroup className="gap-1">
+                {/* NAVEGACIÓN */}
+                <SidebarContent className="px-1.5 sm:px-2 group-data-[collapsible=icon]:px-0.5">
+                    <SidebarGroup className="gap-1">
 
-                    {/* LABEL */}
-                    <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-                        Principal
-                    </SidebarGroupLabel>
+                        {/* LABEL */}
+                        <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+                            Principal
+                        </SidebarGroupLabel>
 
-                    {/* MAP RUTAS */}
-                    <TooltipProvider delayDuration={300}>
-                        <SidebarMenu className="gap-1">
-                            {projects.map((project) => (
-                                <SidebarMenuItem key={project.name}>
-                                    <SidebarMenuButton
-                                        render={<Link to={project.url} />}
-                                        isActive={pathname === project.url}
-                                        tooltip={project.name}
-                                        className="h-11 sm:h-12 px-2.5 sm:px-3 gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 
+                        {/* MAP RUTAS */}
+                        <TooltipProvider delayDuration={300}>
+                            <SidebarMenu className="gap-1">
+                                {projects.map((project) => (
+                                    <SidebarMenuItem key={project.name}>
+                                        <SidebarMenuButton
+                                            render={<Link to={project.url} />}
+                                            isActive={pathname === project.url}
+                                            tooltip={project.name}
+                                            className="h-11 sm:h-12 px-2.5 sm:px-3 gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 
                                             hover:bg-gray-600 transition"
-                                    >
-                                        <project.icon className="size-5 shrink-0" />
+                                        >
+                                            <project.icon className="size-5 shrink-0" />
 
-                                        <span className="group-data-[collapsible=icon]:hidden truncate">
-                                            {project.name}
-                                        </span>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
-                        </SidebarMenu>
-                    </TooltipProvider>
-                </SidebarGroup>
+                                            <span className="group-data-[collapsible=icon]:hidden truncate">
+                                                {project.name}
+                                            </span>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                ))}
+                            </SidebarMenu>
+                        </TooltipProvider>
+                    </SidebarGroup>
 
-                {/* RECIENTES */}
-                <SidebarGroup>
+                    {/* RECIENTES */}
+                    <SidebarGroup>
 
-                    {/* LABEL */}
-                    <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-                        Recientes
-                    </SidebarGroupLabel>
+                        {/* LABEL */}
+                        <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+                            Recientes
+                        </SidebarGroupLabel>
 
-                    {/* MAP RUTAS */}
-                    {/* <TooltipProvider delayDuration={300}>
+                        {/* MAP RUTAS */}
+                        {/* <TooltipProvider delayDuration={300}>
                         <SidebarMenu className="gap-1">
 
                         </SidebarMenu>
                     </TooltipProvider> */}
-                </SidebarGroup>
-            </SidebarContent>
+                    </SidebarGroup>
+                </SidebarContent>
 
-            {/* PERFIL*/}
-            <SidebarFooter className="flex items-center">
-                <SidebarMenu>
-                    <SidebarMenuItem className={"w-full flex justify-center"}>
-                        <DropdownMenu>
-                            {/* BOTÓN DEL PERFIL */}
-                            <DropdownMenuTrigger asChild>
-                                <SidebarMenuButton className="h-14 sm:h-16 group-data-[collapsible=icon]:border-none w-full justify-between group-data-[collapsible=icon]:h-10
+                {/* PERFIL*/}
+                <SidebarFooter className="flex items-center">
+                    <SidebarMenu>
+                        <SidebarMenuItem className={"w-full flex justify-center"}>
+                            <DropdownMenu>
+                                {/* BOTÓN DEL PERFIL */}
+                                <DropdownMenuTrigger asChild>
+                                    <SidebarMenuButton className="h-14 sm:h-16 group-data-[collapsible=icon]:border-none w-full justify-between group-data-[collapsible=icon]:h-10
                                      group-data-[collapsible=icon]:justify-center cursor-pointer"
-                                >
-                                    {/* USER INFO */}
-                                    <div className="flex items-center gap-2 sm:gap-3 w-full justify-center min-w-0">
-                                        <Avatar size="sm" className="shrink-0 group-data-[collapsible=icon]:size-8"
+                                    >
+                                        {/* USER INFO */}
+                                        <div className="flex items-center gap-2 sm:gap-3 w-full justify-center min-w-0">
+                                            <Avatar size="sm" className="shrink-0 group-data-[collapsible=icon]:size-8"
+                                            >
+                                                <AvatarImage
+                                                    alt="Pedro Suárez"
+                                                    className="bg-blue-500"
+                                                />
+                                                <AvatarFallback className="bg-blue-500 text-white">
+                                                    PS
+                                                </AvatarFallback>
+                                            </Avatar>
+
+                                            <div className="flex flex-col items-start min-w-0 group-data-[collapsible=icon]:hidden"
+                                            >
+                                                <span className="text-sm truncate w-full">
+                                                    Pedro Suárez
+                                                </span>
+
+                                                <span className="text-xs text-muted-foreground truncate w-full">
+                                                    Ing. de sistemas
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <ChevronRight className="shrink-0 group-data-[collapsible=icon]:hidden" />
+                                    </SidebarMenuButton>
+                                </DropdownMenuTrigger>
+                                {/* DROPDOWN */}
+                                <DropdownMenuContent side="left" align="end" className="px-2">
+                                    {/* INFORMACIÓN DEL USUARIO */}
+                                    <div className="flex items-center gap-3 py-2 px-1">
+                                        <Avatar size="lg" className="shrink-0 group-data-[collapsible=icon]:size-8"
                                         >
                                             <AvatarImage
                                                 alt="Pedro Suárez"
@@ -142,7 +186,7 @@ export function AppSidebar() {
                                             </AvatarFallback>
                                         </Avatar>
 
-                                        <div className="flex flex-col items-start min-w-0 group-data-[collapsible=icon]:hidden"
+                                        <div className="flex flex-col items-start min-w-0"
                                         >
                                             <span className="text-sm truncate w-full">
                                                 Pedro Suárez
@@ -153,63 +197,30 @@ export function AppSidebar() {
                                             </span>
                                         </div>
                                     </div>
-                                    <ChevronRight className="shrink-0 group-data-[collapsible=icon]:hidden" />
-                                </SidebarMenuButton>
-                            </DropdownMenuTrigger>
-                            {/* DROPDOWN */}
-                            <DropdownMenuContent side="left" align="end" className="px-2">
-                                {/* INFORMACIÓN DEL USUARIO */}
-                                <div className="flex items-center gap-3 py-2 px-1">
-                                    <Avatar size="lg" className="shrink-0 group-data-[collapsible=icon]:size-8"
-                                    >
-                                        <AvatarImage
-                                            alt="Pedro Suárez"
-                                            className="bg-blue-500"
-                                        />
-                                        <AvatarFallback className="bg-blue-500 text-white">
-                                            PS
-                                        </AvatarFallback>
-                                    </Avatar>
+                                    <DropdownMenuSeparator />
 
-                                    <div className="flex flex-col items-start min-w-0"
-                                    >
-                                        <span className="text-sm truncate w-full">
-                                            Pedro Suárez
-                                        </span>
+                                    <DropdownMenuItem asChild>
+                                        {/* <Link to="/profile"> */}
+                                        Ver perfil
+                                        {/* </Link> */}
+                                    </DropdownMenuItem>
 
-                                        <span className="text-xs text-muted-foreground truncate w-full">
-                                            Ing. de sistemas
-                                        </span>
-                                    </div>
-                                </div>
-                                <DropdownMenuSeparator />
+                                    <DropdownMenuSeparator />
 
-                                <DropdownMenuItem asChild>
-                                    {/* <Link to="/profile"> */}
-                                    Ver perfil
-                                    {/* </Link> */}
-                                </DropdownMenuItem>
-
-                                <DropdownMenuSeparator />
-                                
-                                <Link to={"/"} className="w-full h-full cursor-pointer">
                                     <DropdownMenuItem
                                         className="text-red-500 focus:text-red-500 w-full h-full"
-                                        onClick={() => {
-                                            console.log("Cerrar sesión");
-                                        }}
+                                        onClick={handleLogout}
                                     >
                                         Cerrar sesión
                                     </DropdownMenuItem>
-                                </Link>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-                <SidebarTrigger className="shrink-0 size-8 hover:bg-gray-600 transition cursor-pointer" />
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </SidebarMenuItem>
+                    </SidebarMenu>
+                    <SidebarTrigger className="shrink-0 size-8 hover:bg-gray-600 transition cursor-pointer" />
 
-            </SidebarFooter>
-        </Sidebar>
+                </SidebarFooter>
+            </Sidebar>
         </>
     );
 }
