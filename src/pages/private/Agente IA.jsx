@@ -1,3 +1,5 @@
+import { useConversationSocket } from "@/hooks/useConversationSocket";
+import apiFetch from "@/lib/apiClient";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -100,7 +102,28 @@ export default function AIAgent() {
   ]);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
+  const [conversationId, setConversationId] = useState(null)
   const bottomRef = useRef(null);
+
+
+  useEffect(() => {
+
+    async function obtenerConversacionPorIa() {
+      try {
+        const response = await apiFetch.post("/conversation", {
+          type: 'AI_AGENT'
+        })
+
+        setConversationId(response.data.id)
+      } catch (err) {
+        console.error("No se pudo iniciar la conversación con el agente: ", err)
+      }
+    }
+
+    obtenerConversacionPorIa()
+
+  }, [])
+
 
   const [rmForm, setRmForm] = useState({
     career: "Ingeniería en Sistemas",
@@ -117,17 +140,34 @@ export default function AIAgent() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, thinking]);
 
-  function sendMessage() {
+  async function sendMessage() {
     if (!input.trim()) return;
     const userMsg = input.trim();
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", text: userMsg }]);
-    setThinking(true);
-    setTimeout(() => {
-      setThinking(false);
-      setMessages((prev) => [...prev, { role: "ai", text: getAIResponse(userMsg) }]);
-    }, 1200 + Math.random() * 600);
+
+    try {
+      await apiFetch.post('/message', {
+        content: userMsg, conversation_id: conversationId
+      })
+
+    } catch (err) {
+      console.error(err)
+    }
+
+
   }
+
+  useConversationSocket(conversationId, (newMessage) => {
+    setMessages((prev) => [...prev, {
+      role: newMessage.isFromAgent ? 'ai' : 'user',
+      text: newMessage.content
+    }])
+    if (newMessage.isFromAgent) {
+      setThinking(false)
+    } else {
+      setThinking(true)
+    }
+  })
 
   function generateRM() {
     if (rmForm.areas.length === 0) return;
@@ -186,13 +226,13 @@ export default function AIAgent() {
                 style={
                   mode === option.key
                     ? {
-                        background: "linear-gradient(135deg, #5a7cff, #4a69d8)",
-                        color: "#ffffff",
-                        boxShadow: "0 8px 18px rgba(90, 124, 255, 0.25)",
-                      }
+                      background: "linear-gradient(135deg, #5a7cff, #4a69d8)",
+                      color: "#ffffff",
+                      boxShadow: "0 8px 18px rgba(90, 124, 255, 0.25)",
+                    }
                     : {
-                        color: "rgba(220, 230, 255, 0.82)",
-                      }
+                      color: "rgba(220, 230, 255, 0.82)",
+                    }
                 }
               >
                 {option.label}
@@ -218,21 +258,20 @@ export default function AIAgent() {
                   </div>
                 )}
                 <div
-                  className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                    msg.role === "ai" ? "border" : "bg-primary text-white"
-                  }`}
+                  className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${msg.role === "ai" ? "border" : "bg-primary text-white"
+                    }`}
                   style={
                     msg.role === "ai"
                       ? {
-                          background: "rgba(79, 95, 145, 0.34)",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          color: "#f4f7ff",
-                          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.02)",
-                        }
+                        background: "rgba(79, 95, 145, 0.34)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        color: "#f4f7ff",
+                        boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.02)",
+                      }
                       : {
-                          background: "linear-gradient(135deg, #5c7efb, #4a6ee5)",
-                          color: "#ffffff",
-                        }
+                        background: "linear-gradient(135deg, #5c7efb, #4a6ee5)",
+                        color: "#ffffff",
+                      }
                   }
                 >
                   {msg.text.split("\n").map((line, lineIndex) => (
@@ -279,7 +318,7 @@ export default function AIAgent() {
             {[
               "¿Qué cursos me recomiendas?",
               "¿Cómo están los profesores de Algoritmos?",
-              "Dame un roadmap para backend",
+              // "Dame un roadmap para backend",
             ].map((suggestion) => (
               <button
                 key={suggestion}
@@ -500,11 +539,10 @@ export default function AIAgent() {
                       setSaved(true);
                       setTimeout(() => navigate("/roadmap"), 800);
                     }}
-                    className={`px-3 py-2 rounded-xl text-xs font-medium transition-all ${
-                      saved
-                        ? "bg-accent/10 border border-accent/30 text-accent"
-                        : "bg-primary hover:bg-primary/90 text-white hover:shadow-lg hover:shadow-primary/25"
-                    }`}
+                    className={`px-3 py-2 rounded-xl text-xs font-medium transition-all ${saved
+                      ? "bg-accent/10 border border-accent/30 text-accent"
+                      : "bg-primary hover:bg-primary/90 text-white hover:shadow-lg hover:shadow-primary/25"
+                      }`}
                   >
                     {saved ? "✓ Guardado" : "Guardar roadmap"}
                   </button>
