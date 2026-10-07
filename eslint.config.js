@@ -17,5 +17,17 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+      // ignora imports/variables con mayúscula inicial (React, Link, iconos...)
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+    },
+  },
+  {
+    // shadcn/ui, hooks y contexto: silenciar reglas que no aportan aquí
+    files: ['src/components/ui/**', 'src/hooks/**', 'src/context/**'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ])
