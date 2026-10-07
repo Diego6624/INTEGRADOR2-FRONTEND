@@ -2,9 +2,10 @@ import { createBrowserRouter, createRoutesFromElements, Route } from "react-rout
 import Home from "../pages/public/Home/Home";
 import Inicio from "../pages/public/Login/Login";
 import Forum from "@/pages/private/forum/Forum";
+import ForumPostPage from "@/pages/private/forum/ForumPostPage";
 import Roadmap from "@/pages/private/Roadmap";
 import AgenteIA from "@/pages/private/Agente IA";
-import Chats from "@/pages/private/Chats";
+import Chats from "@/pages/private/chat/Chats";
 import App from "@/App";
 import Registro from "@/pages/public/Registro/Registro";
 import { Profile } from "@/pages/private/profile/Profile";
@@ -19,6 +20,7 @@ const router = createBrowserRouter(
             <Route path="/register" element={<Registro />} />
             <Route element={<App />}>
                 <Route path="/forum" element={<Forum />} />
+                <Route path="/forum/:id" element={<ForumPostPage />} />
                 <Route path="/roadmap" element={<Roadmap />} />
                 <Route path="/agent" element={<AgenteIA />} />
                 <Route path="/chat" element={<Chats />} />
