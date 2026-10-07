@@ -140,10 +140,11 @@ export function AppSidebar() {
                         <SidebarMenuItem className={"w-full flex justify-center"}>
                             <DropdownMenu>
                                 {/* BOTÓN DEL PERFIL */}
-                                <DropdownMenuTrigger asChild>
-                                    <SidebarMenuButton className="h-14 sm:h-16 group-data-[collapsible=icon]:border-none w-full justify-between group-data-[collapsible=icon]:h-10
+                                <DropdownMenuTrigger
+                                    render={
+                                        <SidebarMenuButton className="h-14 sm:h-16 group-data-[collapsible=icon]:border-none w-full justify-between group-data-[collapsible=icon]:h-10
                                      group-data-[collapsible=icon]:justify-center cursor-pointer"
-                                    >
+                                        >
                                         {/* USER INFO */}
                                         <div className="flex items-center gap-2 sm:gap-3 w-full justify-center min-w-0">
                                             <Avatar size="sm" className="shrink-0 group-data-[collapsible=icon]:size-8"
@@ -169,8 +170,9 @@ export function AppSidebar() {
                                             </div>
                                         </div>
                                         <ChevronRight className="shrink-0 group-data-[collapsible=icon]:hidden" />
-                                    </SidebarMenuButton>
-                                </DropdownMenuTrigger>
+                                        </SidebarMenuButton>
+                                    }
+                                />
                                 {/* DROPDOWN */}
                                 <DropdownMenuContent side="left" align="end" className="px-2">
                                     {/* INFORMACIÓN DEL USUARIO */}
@@ -199,7 +201,7 @@ export function AppSidebar() {
                                     </div>
                                     <DropdownMenuSeparator />
 
-                                    <DropdownMenuItem asChild>
+                                    <DropdownMenuItem>
                                         {/* <Link to="/profile"> */}
                                         Ver perfil
                                         {/* </Link> */}
