@@ -16,7 +16,7 @@ apiFetch.interceptors.response.use(
 
     (error) => {
 
-        if (error.response?.status === 401 && window.location.pathname !== '/login') {
+        if (error.response?.status === 401 && window.location.pathname !== '/login' && error.config.url !== '/me') {
             window.location.href = '/login'
         }
 
