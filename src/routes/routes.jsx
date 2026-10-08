@@ -11,6 +11,7 @@ import Registro from "@/pages/public/Registro/Registro";
 import { Profile } from "@/pages/private/profile/Profile";
 import Test from "@/pages/private/Test/test";
 import ProtectedRoute from "@/hooks/ProtectedRoute";
+import PublicOnlyRoute from "@/hooks/PublicOnlyRoute";
 
 
 const router = createBrowserRouter(
@@ -33,12 +34,11 @@ const router = createBrowserRouter(
     // )
     [
         {
-            path: "/login",
-            element: <Inicio />
-        },
-        {
-            path: "/register",
-            element: <Registro />
+            element: <PublicOnlyRoute />,
+            children: [
+                { path: "/login", element: <Inicio /> },
+                { path: "/register", element: <Registro /> },
+            ],
         },
         {
             path: "/",
