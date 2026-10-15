@@ -1,4 +1,4 @@
-import { Brain, ChevronRight, ClipboardCheck, Map, MessageCircle, Users } from "lucide-react";
+import { Brain, ChevronRight, ClipboardCheck, Map, MessageCircle, Users, Info } from "lucide-react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
     Sidebar,
@@ -29,7 +29,8 @@ const projects = [
     { name: "Roadmap", icon: Map, url: "/roadmap" },
     { name: "Agente IA", icon: Brain, url: "/agent" },
     { name: "Chats", icon: MessageCircle, url: "/chat" },
-    { name: "Test vocacional", icon: ClipboardCheck, url: "/test" }
+    { name: "Test vocacional", icon: ClipboardCheck, url: "/test" },
+    { name: "Consultas", icon: Info, url: "/information" }
 ];
 
 // Botón flotante que abre/cierra el sidebar. Vive FUERA del componente <Sidebar>
