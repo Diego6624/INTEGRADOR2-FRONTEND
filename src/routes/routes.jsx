@@ -12,6 +12,8 @@ import { Profile } from "@/pages/private/profile/Profile";
 import Test from "@/pages/private/Test/test";
 import ProtectedRoute from "@/hooks/ProtectedRoute";
 import PublicOnlyRoute from "@/hooks/PublicOnlyRoute";
+import { Info } from "lucide-react";
+import Information from "@/pages/private/information/Information";
 
 
 const router = createBrowserRouter(
@@ -56,7 +58,8 @@ const router = createBrowserRouter(
                         {path: "/agent", element: <AgenteIA />},
                         {path: "/chat", element: <Chats />},
                         {path: "/profile", element: <Profile />},
-                        {path: "/test", element: <Test />}
+                        {path: "/test", element: <Test />},
+                        {path: "/information", element: <Information />}
                     ]
                 }
             ]
