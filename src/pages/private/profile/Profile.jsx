@@ -22,7 +22,7 @@ export function Profile() {
 
     function handleChange(event) {
         const {name , value} = event.target
-        setForm({ ...form, [name]: value })
+        setForm(previousForm => ({ ...previousForm, [name]: value }))
     }
 
     async function handleEditUser() {
@@ -123,12 +123,12 @@ export function Profile() {
                     
                     <FieldGroup>
                         <Field>
-                            <FieldLabel htmlFor="nombre">Nombre Completo</FieldLabel>
-                            <Input className={'bg-slate-50'} id="name" type="text" onChange={handleChange} value={form.name} disabled={!edit} />
+                            <FieldLabel htmlFor="name">Nombre Completo</FieldLabel>
+                            <Input className={'bg-slate-50'} id="name" name="name" type="text" onChange={handleChange} value={form.name} disabled={!edit} />
                         </Field>
                         <Field>
-                            <FieldLabel htmlFor="correo">Correo electrónico</FieldLabel>
-                            <Input id="email" type="email" value={form.email} onChange={handleChange} disabled={!edit} />
+                            <FieldLabel htmlFor="email">Correo electrónico</FieldLabel>
+                            <Input id="email" name="email" type="email" value={form.email} onChange={handleChange} disabled={!edit} />
                         </Field>
                         <Field>
                             <FieldLabel htmlFor="universidad">Universidad</FieldLabel>
