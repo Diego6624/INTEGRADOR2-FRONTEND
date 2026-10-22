@@ -1,9 +1,16 @@
+import VocationalTestGate from "@/components/VocationalTestGate";
+import useVocationalAccess from "@/hooks/useVocationalAccess";
 import ChatSidebar from "./components/ChatSidebar";
 import ConversationPanel from "./components/ConversationPanel";
 import NewChatDialog from "./components/NewChatDialog";
 import useChats from "./hooks/useChats";
 
 export default function ChatsPage() {
+  const access = useVocationalAccess();
+  return <VocationalTestGate access={access} action="chatear con otros usuarios"><ChatsContent /></VocationalTestGate>;
+}
+
+function ChatsContent() {
   const chat = useChats();
 
   function handleBackToList() {
