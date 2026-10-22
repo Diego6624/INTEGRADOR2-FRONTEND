@@ -4,17 +4,6 @@ export function apiError(error, fallback) {
   return data?.mensaje || data?.message || error.message || fallback;
 }
 
-export function rankCareers(options) {
-  const scores = new Map();
-  for (const option of options) {
-    for (const [career, score] of Object.entries(option.careerScore ?? {})) {
-      if (career.trim() && Number.isFinite(score)) scores.set(career, (scores.get(career) ?? 0) + score);
-    }
-  }
-  return [...scores].map(([career, score]) => ({ career, score }))
-    .sort((a, b) => b.score - a.score || a.career.localeCompare(b.career, 'es'));
-}
-
 export function prepareResult(questions, answers) {
   if (!questions.length) throw new Error('No hay preguntas disponibles.');
   const selected = questions.map(question => {
@@ -22,33 +11,27 @@ export function prepareResult(questions, answers) {
     if (!option) throw new Error('Responde todas las preguntas antes de finalizar.');
     return option;
   });
-  const ranking = rankCareers(selected);
-  if (!ranking.length || ranking[0].score <= 0) {
-    throw new Error('Las opciones seleccionadas no tienen puntajes suficientes para calcular el resultado.');
-  }
-  return { suggestedCareer: ranking[0].career, vocacionalOptionIds: selected.map(option => option.id) };
+  return { vocacionalOptionIds: selected.map(option => option.id) };
 }
 
 export function createVocationalApi(client) {
-  async function pages(path, signal, visit) {
+  async function pages(path, signal) {
     let page = 0;
     const items = [];
     while (true) {
       const { data } = await client.get(path, { signal, params: { page, size: 100, sort: 'id,asc' } });
       const content = data.content ?? [];
-      if (visit) {
-        const match = visit(content);
-        if (match) return match;
-      } else items.push(...content);
+      items.push(...content);
       if (!content.length || data.last === true || page + 1 >= (data.totalPages ?? 1)) break;
       page += 1;
     }
-    return visit ? null : items;
+    return items;
   }
 
   async function findResult(userId, signal) {
-    return pages('/vocational-test-result', signal,
-      content => content.find(item => String(item.userId) === String(userId)));
+    if (userId == null) return null;
+    const { data, status } = await client.get('/vocational-test-result/me', { signal });
+    return status === 204 || !data || String(data.userId) !== String(userId) ? null : data;
   }
 
   return {
@@ -64,7 +47,8 @@ export function createVocationalApi(client) {
           id: option.id, texto: option.text, careerScore: option.careerScore,
         })),
       }));
-      if (questions.some(question => !question.opciones.length)) {
+      if (questions.length < 20 || questions.length > 40) throw new Error("El test debe tener entre 20 y 40 preguntas configuradas.");
+      if (questions.some(question => question.opciones.length < 2)) {
         throw new Error('Hay preguntas sin opciones configuradas. Intenta nuevamente cuando el test esté disponible.');
       }
       return { userId: user.id, result: null, questions };

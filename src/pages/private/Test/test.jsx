@@ -110,8 +110,8 @@ export default function Test() {
   }
 
   return (
-    <main className="flex min-h-screen items-start justify-center px-4 pt-10 pb-6 sm:px-6 sm:pt-16 sm:pb-10">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-black/70 p-5 shadow-2xl shadow-black/40 backdrop-blur-md sm:max-w-lg sm:rounded-3xl sm:p-8 md:max-w-xl">
+    <main className="flex items-start justify-center py-4 sm:py-6">
+      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-black/70 p-5 shadow-2xl shadow-black/40 backdrop-blur-md sm:rounded-3xl sm:p-8 md:max-w-2xl">
         {test.saveError && <p role="alert" className="mb-4 rounded-xl bg-rose-500/10 p-3 text-sm text-rose-200">{test.saveError}</p>}
         {contenido}
       </div>

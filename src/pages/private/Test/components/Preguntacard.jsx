@@ -5,7 +5,7 @@ export default function PreguntaCard({ pregunta, seleccionActual, onSeleccionar,
         {pregunta.texto}
       </h2>
 
-      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 gap-3 ">
         {pregunta.opciones.map((opcion, indice) => {
           const seleccionada = seleccionActual === indice
 
@@ -19,7 +19,7 @@ export default function PreguntaCard({ pregunta, seleccionActual, onSeleccionar,
               className={`group disabled:opacity-60 disabled:cursor-wait flex items-start gap-3 rounded-xl px-4 py-4 text-left transition-all duration-200 ${
                 seleccionada
                   ? 'bg-gradient-to-br from-[#40a9e6] to-[#3d7de3] text-white shadow-lg shadow-[#3d7de3]/20'
-                  : 'bg-[#f1f1f3] text-[#4a4750] hover:-translate-y-0.5 hover:shadow-md'
+                  : 'border border-white/10 bg-white/5 text-slate-200 hover:bg-white/10'
               }`}
             >
               <span
