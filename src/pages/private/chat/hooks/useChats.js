@@ -48,6 +48,7 @@ export default function useChats() {
   const typingTimerRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const typingActiveRef = useRef(false);
+  const creatingConversationRef = useRef(false);
   const currentUserId = currentUser?.id;
   const selectedConversation = conversations.find((conversation) => conversation.id === selectedId);
 
@@ -256,7 +257,22 @@ export default function useChats() {
   }, [currentUserId, users.length]);
 
   const createConversation = useCallback(async (participant) => {
+    if (creatingConversationRef.current) return;
+
     setActionError("");
+    const existingConversation = conversations.find((conversation) =>
+      conversation.type === "DIRECT" && (
+        String(conversation.otherUser?.id) === String(participant.id)
+        || conversation.participants?.some((user) => String(user.id) === String(participant.id))
+      )
+    );
+    if (existingConversation) {
+      setShowNewChat(false);
+      selectConversation(existingConversation.id);
+      return;
+    }
+
+    creatingConversationRef.current = true;
     try {
       const response = await apiFetch.post("/conversation", {
         type: "DIRECT",
@@ -270,7 +286,10 @@ export default function useChats() {
     } catch (requestError) {
       setActionError(getApiError(requestError, "No se pudo iniciar la conversación."));
     }
-  }, [selectConversation]);
+    finally {
+      creatingConversationRef.current = false;
+    }
+  }, [conversations, selectConversation]);
 
   const sendMessage = useCallback(async (event) => {
     event.preventDefault();
