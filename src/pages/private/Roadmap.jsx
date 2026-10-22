@@ -1,3 +1,4 @@
+import VocationalTestGate from '@/components/VocationalTestGate';
 import { useCallback, useRef, useState } from 'react';
 import { ReactFlow, Background, Controls, Handle, Position, applyNodeChanges } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -171,14 +172,14 @@ export default function RoadmapPage() {
       </nav>
       {api.actionError && <p role="alert" className="rounded-lg bg-rose-500/10 p-3 text-sm text-rose-200">{api.actionError}</p>}
       {busy && <p role="status" className="text-xs text-indigo-200">Guardando cambios…</p>}
-      {creating && <form onSubmit={create} className={`${panel} space-y-3`}>
+      {creating && <VocationalTestGate access={api.vocationalAccess} action="crear roadmaps"><form onSubmit={create} className={`${panel} space-y-3`}>
         <h2 className="text-lg text-white">Nuevo roadmap</h2>
         <label className="block text-sm text-slate-300">Título<input className={`${input} mt-1`} name="title" required pattern=".*\S.*" /></label>
         <label className="block text-sm text-slate-300">Descripción<textarea className={`${input} mt-1`} name="description" required /></label>
         <label className="block text-sm text-slate-300">Categoría<input className={`${input} mt-1`} name="category" required pattern=".*\S.*" /></label>
         <label className="flex items-center gap-2 text-sm text-slate-300"><input type="checkbox" name="isPublic" /> Público</label>
         <button className={button} disabled={api.pending.create}>Crear roadmap</button>
-      </form>}
+      </form></VocationalTestGate>}
       {api.loading ? <p role="status" className="text-slate-300">Cargando roadmaps…</p>
         : api.error ? <div role="alert" className="space-y-3 text-rose-200"><p>{api.error}</p><button className={button} onClick={api.refresh}>Reintentar</button></div>
         : !api.roadmaps.length ? <p className="text-slate-400">{tab === 'mis' ? 'Todavía no tienes roadmaps. Crea uno para comenzar.' : 'No hay roadmaps públicos disponibles.'}</p>

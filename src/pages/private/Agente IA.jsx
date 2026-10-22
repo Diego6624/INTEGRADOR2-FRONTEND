@@ -1,3 +1,5 @@
+import VocationalTestGate from "@/components/VocationalTestGate";
+import useVocationalAccess from "@/hooks/useVocationalAccess";
 import { useConversationSocket } from "@/hooks/useConversationSocket";
 import apiFetch from "@/lib/apiClient";
 import { useState, useRef, useEffect } from "react";
@@ -92,6 +94,7 @@ const typeColors = {
 };
 
 export default function AIAgent() {
+  const vocationalAccess = useVocationalAccess();
   const navigate = useNavigate();
   const [mode, setMode] = useState("consultar");
   const [messages, setMessages] = useState([
@@ -170,7 +173,7 @@ export default function AIAgent() {
   })
 
   function generateRM() {
-    if (rmForm.areas.length === 0) return;
+    if (!vocationalAccess.allowed || rmForm.areas.length === 0) return;
     setGenerating(true);
     setTimeout(() => {
       setGeneratedRoadmap(generateRoadmap(rmForm.career, rmForm.goal, rmForm.areas));
@@ -377,7 +380,7 @@ export default function AIAgent() {
       )}
 
       {mode === "roadmap" && (
-        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+        <VocationalTestGate access={vocationalAccess} action="generar roadmaps"><div className="flex-1 overflow-y-auto p-4 md:p-6">
           {!generatedRoadmap ? (
             <div className="max-w-3xl mx-auto space-y-5">
               <div
@@ -596,7 +599,7 @@ export default function AIAgent() {
               </div>
             </div>
           )}
-        </div>
+        </div></VocationalTestGate>
       )}
     </div>
   );

@@ -1,3 +1,5 @@
+import useVocationalAccess from '@/hooks/useVocationalAccess';
+import { requireVocationalTest } from '@/lib/vocationalAccess';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import apiFetch from '@/lib/apiClient';
 import { createRoadmapApi, errorMessage } from './roadmapApi';
@@ -6,6 +8,7 @@ const roadmapApi = createRoadmapApi(apiFetch);
 const { fetchAllPages } = roadmapApi;
 
 export default function useRoadmaps(tab) {
+  const vocationalAccess = useVocationalAccess();
   const [roadmaps, setRoadmaps] = useState([]);
   const [userId, setUserId] = useState(null);
   const [progress, setProgress] = useState({});
@@ -91,6 +94,7 @@ export default function useRoadmaps(tab) {
   });
 
   const createRoadmap = values => mutate('create', async () => {
+    await requireVocationalTest(apiFetch, userId);
     await roadmapApi.createRoadmap(values);
     if (active.current) refresh();
   });
@@ -102,6 +106,6 @@ export default function useRoadmaps(tab) {
     if (active.current) refresh();
   });
 
-  return { roadmaps, userId, progress, loading, error, actionError, pending, revision,
+  return { vocationalAccess, roadmaps, userId, progress, loading, error, actionError, pending, revision,
     refresh, savePosition, saveStatus, createRoadmap, createStep };
 }

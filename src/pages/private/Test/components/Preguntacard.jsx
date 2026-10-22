@@ -1,4 +1,4 @@
-export default function PreguntaCard({ pregunta, seleccionActual, onSeleccionar }) {
+export default function PreguntaCard({ pregunta, seleccionActual, onSeleccionar, disabled = false }) {
   return (
     <div>
       <h2 className="text-xl font-semibold leading-snug text-white sm:text-2xl">
@@ -11,10 +11,12 @@ export default function PreguntaCard({ pregunta, seleccionActual, onSeleccionar 
 
           return (
             <button
-              key={indice}
+              key={opcion.id}
               type="button"
-              onClick={() => onSeleccionar(indice, opcion.area)}
-              className={`group flex items-start gap-3 rounded-xl px-4 py-4 text-left transition-all duration-200 ${
+              disabled={disabled}
+              aria-pressed={seleccionada}
+              onClick={() => onSeleccionar(indice)}
+              className={`group disabled:opacity-60 disabled:cursor-wait flex items-start gap-3 rounded-xl px-4 py-4 text-left transition-all duration-200 ${
                 seleccionada
                   ? 'bg-gradient-to-br from-[#40a9e6] to-[#3d7de3] text-white shadow-lg shadow-[#3d7de3]/20'
                   : 'bg-[#f1f1f3] text-[#4a4750] hover:-translate-y-0.5 hover:shadow-md'
