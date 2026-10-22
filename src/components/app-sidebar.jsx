@@ -20,8 +20,9 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useContext } from "react";
+import { userInitials } from "@/lib/userIdentity";
 import { AuthContext } from "@/context/AuthContext";
 
 const projects = [
@@ -43,7 +44,7 @@ export function AppSidebar() {
 
     const { pathname } = useLocation();
     const navigate = useNavigate()
-    const { cerrarSesion } = useContext(AuthContext)
+    const { cerrarSesion, usuario } = useContext(AuthContext)
 
 
     const handleLogout = async () => {
@@ -64,7 +65,7 @@ export function AppSidebar() {
                 // En mobile el panel se abre como off-canvas (drawer) a ancho completo del componente Sidebar;
                 // en escritorio respeta el ancho configurado por el primitive.
                 style={{ "--sidebar-width-mobile": "17rem" }}
-                className="flex flex-col justify-center min-w-min top-2"
+                className="flex flex-col justify-center"
             >
                 {/* HEADER */}
                 <SidebarHeader className="p-3 sm:p-4 group-data-[collapsible=icon]:p-2 flex justify-center items-center">
@@ -103,7 +104,7 @@ export function AppSidebar() {
                                             render={<Link to={project.url} />}
                                             isActive={pathname === project.url}
                                             tooltip={project.name}
-                                            className="h-11 sm:h-12 px-2.5 sm:px-3 gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 
+                                            className="h-11 sm:h-12 px-2.5 sm:px-3 gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0
                                             hover:bg-gray-600 transition"
                                         >
                                             <project.icon className="size-5 shrink-0" />
@@ -150,23 +151,20 @@ export function AppSidebar() {
                                         <div className="flex items-center gap-2 sm:gap-3 w-full justify-center min-w-0">
                                             <Avatar size="sm" className="shrink-0 group-data-[collapsible=icon]:size-8"
                                             >
-                                                <AvatarImage
-                                                    alt="Pedro Suárez"
-                                                    className="bg-blue-500"
-                                                />
+
                                                 <AvatarFallback className="bg-blue-500 text-white">
-                                                    PS
+                                                    {userInitials(usuario?.name)}
                                                 </AvatarFallback>
                                             </Avatar>
 
                                             <div className="flex flex-col items-start min-w-0 group-data-[collapsible=icon]:hidden"
                                             >
                                                 <span className="text-sm truncate w-full">
-                                                    Pedro Suárez
+                                                    {usuario?.name || "Usuario"}
                                                 </span>
 
                                                 <span className="text-xs text-muted-foreground truncate w-full">
-                                                    Ing. de sistemas
+                                                    {usuario?.university || usuario?.email || "Mi cuenta"}
                                                 </span>
                                             </div>
                                         </div>
@@ -180,33 +178,26 @@ export function AppSidebar() {
                                     <div className="flex items-center gap-3 py-2 px-1">
                                         <Avatar size="lg" className="shrink-0 group-data-[collapsible=icon]:size-8"
                                         >
-                                            <AvatarImage
-                                                alt="Pedro Suárez"
-                                                className="bg-blue-500"
-                                            />
+
                                             <AvatarFallback className="bg-blue-500 text-white">
-                                                PS
+                                                {userInitials(usuario?.name)}
                                             </AvatarFallback>
                                         </Avatar>
 
                                         <div className="flex flex-col items-start min-w-0"
                                         >
                                             <span className="text-sm truncate w-full">
-                                                Pedro Suárez
+                                                {usuario?.name || "Usuario"}
                                             </span>
 
                                             <span className="text-xs text-muted-foreground truncate w-full">
-                                                Ing. de sistemas
+                                                {usuario?.university || usuario?.email || "Mi cuenta"}
                                             </span>
                                         </div>
                                     </div>
                                     <DropdownMenuSeparator />
 
-                                    <DropdownMenuItem>
-                                        {/* <Link to="/profile"> */}
-                                        Ver perfil
-                                        {/* </Link> */}
-                                    </DropdownMenuItem>
+                                    <DropdownMenuItem render={<Link to="/profile" />}>Ver perfil</DropdownMenuItem>
 
                                     <DropdownMenuSeparator />
 

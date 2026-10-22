@@ -12,7 +12,7 @@ function FloatingSidebarToggle() {
             type="button"
             onClick={toggleSidebar}
             aria-label="Abrir menú"
-            className="md:hidden fixed top-7 left-3 z-50 flex size-10 items-center justify-center rounded-full
+            className="md:hidden fixed top-5 left-4 sm:top-7 sm:left-6 z-50 flex size-10 items-center justify-center rounded-full
                 border border-white/10 bg-blue-500 backdrop-blur-md transition hover:bg-gray-600 cursor-pointer"
         >
             <Menu className="size-5" />
@@ -28,13 +28,13 @@ export default function Layout({ children }) {
                 backgroundImage: `url(${background})`,
             }}
         >
-            <SidebarProvider defaultOpen={true}>
+            <SidebarProvider defaultOpen={true} className="items-start gap-4 lg:gap-6">
                 <FloatingSidebarToggle />
 
                 <AppSidebar />
-                <SidebarInset className={'bg-transparent'}>
+                <SidebarInset className="min-w-0 gap-5 bg-transparent sm:gap-6">
                     <Header />
-                    <main className={`p-2 pt-4`}>
+                    <main className="min-w-0 w-full pb-6">
                         {children}
                     </main>
                 </SidebarInset>

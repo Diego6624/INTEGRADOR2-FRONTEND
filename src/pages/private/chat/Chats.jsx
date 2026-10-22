@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import VocationalTestGate from "@/components/VocationalTestGate";
 import useVocationalAccess from "@/hooks/useVocationalAccess";
 import ChatSidebar from "./components/ChatSidebar";
@@ -12,6 +14,19 @@ export default function ChatsPage() {
 
 function ChatsContent() {
   const chat = useChats();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { loading, conversations, selectConversation } = chat;
+  const requestedId = searchParams.get("conversation");
+  useEffect(() => {
+    if (!requestedId || loading) return;
+    const conversation = conversations.find(item => String(item.id) === requestedId);
+    if (conversation) selectConversation(conversation.id);
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous);
+      next.delete("conversation");
+      return next;
+    }, { replace: true });
+  }, [requestedId, loading, conversations, selectConversation, setSearchParams]);
 
   function handleBackToList() {
     chat.stopTyping();

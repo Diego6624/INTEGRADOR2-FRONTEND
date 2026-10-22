@@ -10,6 +10,7 @@ function readMarkerKey(userId, conversationId) {
 
 function saveReadMarker(userId, conversationId) {
   window.localStorage.setItem(readMarkerKey(userId, conversationId), String(Date.now()));
+  window.dispatchEvent(new Event("journet:chat-read"));
 }
 
 function getApiError(error, fallback) {

@@ -10,6 +10,7 @@ export function AuthProvider({ children }) {
         try {
             const response = await apiFetch.get("/me")
             setUsuario(response.data)
+            return response.data
         } catch (err) {
             console.log(err)
             setUsuario(null)
@@ -20,7 +21,6 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
         verificarSesion()
-        // eslint-disable-next-line react-hooks/set-state-in-effect
     }, [])
 
 
