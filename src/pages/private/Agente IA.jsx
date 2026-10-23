@@ -1,31 +1,15 @@
+import { useSearchParams } from "react-router-dom";
+import MarkdownContent from "@/components/MarkdownContent";
+import GeneratedRoadmapPreview from "./roadmap/GeneratedRoadmapPreview";
+import { parseGeneratedRoadmap, formatAgentReply } from "./roadmap/generatedRoadmap";
+import { createRoadmapApi, fetchAllPages } from "./roadmap/roadmapApi";
 import VocationalTestGate from "@/components/VocationalTestGate";
 import useVocationalAccess from "@/hooks/useVocationalAccess";
 import { useConversationSocket } from "@/hooks/useConversationSocket";
 import apiFetch from "@/lib/apiClient";
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-
-const mockResponses = {
-  default:
-    "Basándome en la información del foro y la comunidad de Journet, te puedo dar una recomendación personalizada. ¿Puedes contarme más sobre tu contexto específico? Por ejemplo: ¿en qué semestre estás, cuál es tu carrera y qué área te interesa desarrollar?",
-  curso:
-    "Para cursos online en 2026, las mejores opciones según nuestra comunidad son:\n\n🏆 **Top recomendados:**\n• Platzi - Contenido en español de alta calidad, especialmente para desarrollo web y data science\n• Coursera (con auditoría gratuita) - Cursos de universidades top como Stanford y MIT\n• freeCodeCamp - Completamente gratuito, excelente para desarrollo web\n• The Odin Project - Full-stack, enfocado en práctica real\n\n¿Tienes alguna área específica en mente?",
-  profesor:
-    "Según las reseñas de la comunidad para tu carrera:\n\n⭐ **Profesores más valorados en el foro:**\n• Para Algoritmos: Prof. Martínez (97% recomendación)\n• Para Bases de Datos: Prof. González (94% recomendación)\n• Para Redes: Prof. López (91% recomendación)\n\nEstos datos se basan en comentarios reales de estudiantes de semestres anteriores. ¿Quieres más detalles sobre algún área?",
-  roadmap:
-    "¡Excelente! Puedo ayudarte a crear un roadmap personalizado. Para hacerlo necesito saber:\n\n1. ¿Tu carrera y semestre actual?\n2. ¿Cuál es tu objetivo principal (empleo, maestría, emprendimiento)?\n3. ¿Cuánto tiempo semanal puedes dedicar?\n\nCon esa info genero un roadmap detallado con recursos específicos para ti.",
-};
-
-function getAIResponse(msg) {
-  const lower = msg.toLowerCase();
-  if (lower.includes("curso") || lower.includes("plataforma") || lower.includes("aprender"))
-    return mockResponses.curso;
-  if (lower.includes("profesor") || lower.includes("docente") || lower.includes("materia"))
-    return mockResponses.profesor;
-  if (lower.includes("roadmap") || lower.includes("ruta") || lower.includes("plan"))
-    return mockResponses.roadmap;
-  return mockResponses.default;
-}
+import { requireVocationalTest } from "@/lib/vocationalAccess";
+import { errorMessage } from "./roadmap/roadmapApi";
 
 const roadmapAreas = [
   "Desarrollo Frontend",
@@ -38,69 +22,24 @@ const roadmapAreas = [
   "Data Science",
 ];
 
-function generateRoadmap(career, goal, areas) {
-  return [
-    {
-      phase: "Fase 1 · Fundamentos (Meses 1-2)",
-      items: [
-        { name: "Bases de " + (career || "tu carrera"), type: "teoría" },
-        { name: "Lógica y pensamiento computacional", type: "práctica" },
-        { name: "Git y control de versiones", type: "herramienta" },
-      ],
-    },
-    {
-      phase: "Fase 2 · Núcleo técnico (Meses 3-5)",
-      items: areas
-        .slice(0, 2)
-        .map((area) => ({
-          name: area,
-          type: "especialización",
-        }))
-        .concat([{ name: "Proyecto integrador pequeño", type: "proyecto" }]),
-    },
-    {
-      phase: "Fase 3 · Profundización (Meses 6-8)",
-      items: [
-        { name: areas[2] || "Área avanzada de tu elección", type: "especialización" },
-        { name: "Contribuir a open source", type: "práctica" },
-        {
-          name: goal === "empleo" ? "Preparación de CV y portfolio" : "Preparación para postgrado",
-          type: "meta",
-        },
-      ],
-    },
-    {
-      phase: "Fase 4 · Consolidación (" + (goal === "empleo" ? "Meses 9-12" : "Mes 9+") + ")",
-      items: [
-        { name: "Proyecto final de portfolio", type: "proyecto" },
-        {
-          name: goal === "empleo" ? "Entrevistas técnicas y networking" : "Aplicación a programas académicos",
-          type: "meta",
-        },
-        { name: "Comunidad y mentorías activas", type: "soft skill" },
-      ],
-    },
-  ];
+function displayContent(content, fromAgent) {
+  if (fromAgent) return formatAgentReply(content);
+  if (content.startsWith('Genera un roadmap completo y concreto.')) {
+    return 'Crear mi roadmap personalizado\n' + content.split('\n').slice(2).join('\n');
+  }
+  return content;
 }
-
-const typeColors = {
-  teoría: "#7c6dff",
-  práctica: "#00e5b8",
-  herramienta: "#f0a500",
-  especialización: "#7c6dff",
-  proyecto: "#ff5f6d",
-  meta: "#00e5b8",
-  "soft skill": "#b8b5d0",
-};
 
 export default function AIAgent() {
   const vocationalAccess = useVocationalAccess();
-  const navigate = useNavigate();
-  const [mode, setMode] = useState("consultar");
+  const [requestError, setRequestError] = useState("");
+  const requestLock = useRef(false);
+  const [searchParams] = useSearchParams();
+  const [mode, setMode] = useState(() => searchParams.get("mode") === "roadmap" ? "roadmap" : "consultar");
   const [messages, setMessages] = useState([
     {
       role: "ai",
-      text: "¡Hola, Sebastián! Soy tu agente universitario. Puedo ayudarte a encontrar cursos, recomendarte profesores basándome en el foro, o ayudarte a planificar tu semestre. ¿En qué te ayudo hoy?",
+      text: "¡Hola! Soy tu agente universitario. Puedo ayudarte a encontrar cursos, recomendarte profesores basándome en el foro, o ayudarte a planificar tu semestre. ¿En qué te ayudo hoy?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -118,7 +57,10 @@ export default function AIAgent() {
         })
 
         setConversationId(response.data.id)
+        const history = await fetchAllPages(`/message/conversation/${response.data.id}`, { params: { sort: 'id,asc' } }, apiFetch);
+        if (history.length) setMessages(history.map(message => ({ id: message.id, role: message.isFromAgent ? 'ai' : 'user', text: displayContent(message.content, message.isFromAgent) })));
       } catch (err) {
+        setRequestError("No se pudo iniciar la conversacion con el agente. Recarga la pagina.");
         console.error("No se pudo iniciar la conversación con el agente: ", err)
       }
     }
@@ -135,35 +77,48 @@ export default function AIAgent() {
     hours: "10",
     areas: [],
   });
-  const [generatedRoadmap, setGeneratedRoadmap] = useState(null);
+  const [generated, setGenerated] = useState(null);
+  const [savingRoadmap, setSavingRoadmap] = useState(false);
+  const [savedId, setSavedId] = useState(null);
+  const saveLock = useRef(false);
   const [generating, setGenerating] = useState(false);
-  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, thinking]);
 
-  async function sendMessage() {
-    if (!input.trim()) return;
-    const userMsg = input.trim();
-    setInput("");
-
+  async function submitMessage(content) {
+    if (!content.trim() || !conversationId || requestLock.current) return false;
+    requestLock.current = true;
+    setRequestError("");
+    setThinking(true);
     try {
-      await apiFetch.post('/message', {
-        content: userMsg, conversation_id: conversationId
-      })
-
-    } catch (err) {
-      console.error(err)
+      const { data: user } = await apiFetch.get("/me");
+      await requireVocationalTest(apiFetch, user.id);
+      const { data: sent } = await apiFetch.post("/message", { content, conversation_id: conversationId });
+      const history = await fetchAllPages(`/message/conversation/${conversationId}`, { params: { sort: 'id,asc' } }, apiFetch);
+      setMessages(history.map(message => ({ id: message.id, role: message.isFromAgent ? 'ai' : 'user', text: displayContent(message.content, message.isFromAgent) })));
+      const reply = history.find(message => message.isFromAgent && Number(message.id) > Number(sent.id));
+      return { reply };
+    } catch (error) {
+      setRequestError(errorMessage(error, "No se pudo contactar al agente. Intenta nuevamente."));
+      return false;
+    } finally {
+      requestLock.current = false;
+      setThinking(false);
     }
+  }
 
-
+  async function sendMessage() {
+    const content = input.trim();
+    if (await submitMessage(content)) setInput("");
   }
 
   useConversationSocket(conversationId, (newMessage) => {
-    setMessages((prev) => [...prev, {
+    setMessages((prev) => prev.some(message => message.id === newMessage.id) ? prev : [...prev, {
+      id: newMessage.id,
       role: newMessage.isFromAgent ? 'ai' : 'user',
-      text: newMessage.content
+      text: displayContent(newMessage.content, newMessage.isFromAgent)
     }])
     if (newMessage.isFromAgent) {
       setThinking(false)
@@ -172,13 +127,43 @@ export default function AIAgent() {
     }
   })
 
-  function generateRM() {
-    if (!vocationalAccess.allowed || rmForm.areas.length === 0) return;
+  async function generateRM() {
+    if (!vocationalAccess.allowed || !rmForm.career.trim() || !rmForm.areas.length || generating || !conversationId) return;
     setGenerating(true);
-    setTimeout(() => {
-      setGeneratedRoadmap(generateRoadmap(rmForm.career, rmForm.goal, rmForm.areas));
+    try {
+      const result = await submitMessage([
+        'Genera un roadmap completo y concreto. Devuelve solo un objeto JSON valido, sin bloques de codigo: {"title":"Titulo", "description":"Resumen", "category":"Area", "steps":[{"title":"Nombre del paso", "description":"Objetivo, temas, duracion y recursos en Markdown"}],"connections":[{"source":0,"target":1}]}.',
+        'Incluye conexiones usando indices de steps desde cero. Permite ramas y convergencias cuando tenga sentido y nunca ciclos ni conexiones repetidas. Incluye entre 4 y 7 pasos. title y category no deben exceder 255 caracteres. Si faltan detalles menores asume un nivel inicial y recursos gratuitos. No hagas preguntas en esta respuesta.',
+        `Carrera: ${rmForm.career}. Semestre: ${rmForm.semester}.`,
+        `Objetivo: ${rmForm.goal}. Disponibilidad: ${rmForm.hours} horas por semana.`,
+        `Areas de interes: ${rmForm.areas.join(", ")}.`,
+        `Contexto adicional: ${rmForm.description || "Sin detalles adicionales"}.`,
+      ].join("\n"));
+      if (!result) return;
+      if (!result.reply) throw new Error('No se recibió el roadmap del agente. Intenta nuevamente.');
+      setGenerated(parseGeneratedRoadmap(result.reply.content, rmForm));
+      setSavedId(null);
+    } catch (error) {
+      setRequestError(error.message || 'No se pudo generar el roadmap.');
+    } finally {
       setGenerating(false);
-    }, 1500);
+    }
+  }
+
+  async function saveGenerated() {
+    if (!generated || savedId || saveLock.current) return;
+    saveLock.current = true;
+    setSavingRoadmap(true);
+    setRequestError("");
+    try {
+      const { data } = await createRoadmapApi(apiFetch).createGeneratedRoadmap(generated);
+      setSavedId(data.id);
+    } catch (error) {
+      setRequestError(errorMessage(error, 'No se pudo guardar el roadmap. Puedes reintentar sin volver a generarlo.'));
+    } finally {
+      saveLock.current = false;
+      setSavingRoadmap(false);
+    }
   }
 
   function toggleArea(area) {
@@ -200,6 +185,7 @@ export default function AIAgent() {
         color: "#edf4ff",
       }}
     >
+      {requestError && <p role="alert" className="p-4 text-sm text-rose-200">{requestError}</p>}
       <div className="flex-shrink-0 p-4 md:p-6 border-b border-white/10">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -277,19 +263,8 @@ export default function AIAgent() {
                       }
                   }
                 >
-                  {msg.text.split("\n").map((line, lineIndex) => (
-                    <p key={lineIndex} className={line === "" ? "mt-2" : ""}>
-                      {line.startsWith("🏆") || line.startsWith("⭐") || line.startsWith("1.") || line.startsWith("2.") || line.startsWith("3.") ? (
-                        <span style={{ color: "#f6f9ff" }}>{line}</span>
-                      ) : line.startsWith("•") ? (
-                        <span className="block pl-2" style={{ color: "#f6f9ff" }}>{line}</span>
-                      ) : line.startsWith("**") && line.endsWith("**") ? (
-                        <strong className="font-semibold" style={{ color: "#ffffff" }}>{line.replace(/\*\*/g, "")}</strong>
-                      ) : (
-                        <span style={{ color: "#f2f6ff" }}>{line}</span>
-                      )}
-                    </p>
-                  ))}
+                  {msg.role === 'ai' ? <MarkdownContent>{msg.text}</MarkdownContent>
+                    : <p className="whitespace-pre-wrap">{msg.text}</p>}
                 </div>
               </div>
             ))}
@@ -327,8 +302,7 @@ export default function AIAgent() {
                 key={suggestion}
                 type="button"
                 onClick={() => {
-                  setInput(suggestion);
-                  setTimeout(sendMessage, 50);
+                  submitMessage(suggestion);
                 }}
                 className="flex-shrink-0 rounded-xl px-3 py-1.5 text-xs transition-all"
                 style={{
@@ -362,7 +336,7 @@ export default function AIAgent() {
               <button
                 type="button"
                 onClick={sendMessage}
-                disabled={!input.trim() || thinking}
+                disabled={!input.trim() || thinking || !conversationId}
                 className="disabled:opacity-40 px-4 py-3 rounded-xl transition-all flex-shrink-0"
                 style={{
                   background: "linear-gradient(135deg, #5b7cff, #4b68d8)",
@@ -381,7 +355,7 @@ export default function AIAgent() {
 
       {mode === "roadmap" && (
         <VocationalTestGate access={vocationalAccess} action="generar roadmaps"><div className="flex-1 overflow-y-auto p-4 md:p-6">
-          {!generatedRoadmap ? (
+
             <div className="max-w-3xl mx-auto space-y-5">
               <div
                 className="rounded-2xl p-6 md:p-7"
@@ -479,6 +453,15 @@ export default function AIAgent() {
                     </div>
                   </div>
 
+                  <fieldset className="space-y-2">
+                    <legend className="text-sm text-slate-200">Áreas de interés</legend>
+                    <div className="flex flex-wrap gap-2">
+                      {roadmapAreas.map(area => <label key={area} className="flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2 text-sm">
+                        <input type="checkbox" checked={rmForm.areas.includes(area)} onChange={() => toggleArea(area)} />
+                        {area}
+                      </label>)}
+                    </div>
+                  </fieldset>
                   <div>
                     <label className="block text-[10px] font-medium mb-2 uppercase tracking-[0.18em]" style={{ color: "rgba(224, 232, 255, 0.72)" }}>
                       Describe como quieres tu roadmap
@@ -501,7 +484,7 @@ export default function AIAgent() {
                 <button
                   type="button"
                   onClick={generateRM}
-                  disabled={rmForm.areas.length < 1 || generating}
+                  disabled={rmForm.areas.length < 1 || !rmForm.career.trim() || generating || thinking || savingRoadmap || !conversationId}
                   className="w-full mt-5 rounded-xl text-sm font-semibold py-3 transition-all"
                   style={{
                     background: "linear-gradient(135deg, #58a7ff, #4a7ae7)",
@@ -514,91 +497,9 @@ export default function AIAgent() {
                 </button>
               </div>
             </div>
-          ) : (
-            <div className="max-w-2xl mx-auto">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-xl font-bold text-ink" style={{ fontFamily: "'Fraunces', serif" }}>
-                    Tu roadmap: {rmForm.career}
-                  </h2>
-                  <p className="text-soft text-xs mt-0.5">
-                    Generado para {rmForm.hours}h/semana · Objetivo: {rmForm.goal}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setGeneratedRoadmap(null);
-                      setSaved(false);
-                    }}
-                    className="border border-dim hover:border-primary/40 text-muted hover:text-ink px-3 py-2 rounded-xl text-xs transition-all"
-                  >
-                    Regenerar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSaved(true);
-                      setTimeout(() => navigate("/roadmap"), 800);
-                    }}
-                    className={`px-3 py-2 rounded-xl text-xs font-medium transition-all ${saved
-                      ? "bg-accent/10 border border-accent/30 text-accent"
-                      : "bg-primary hover:bg-primary/90 text-white hover:shadow-lg hover:shadow-primary/25"
-                      }`}
-                  >
-                    {saved ? "✓ Guardado" : "Guardar roadmap"}
-                  </button>
-                </div>
-              </div>
-
-              <div className="relative">
-                <div className="absolute left-5 top-6 bottom-6 w-px bg-dim" />
-                <div className="space-y-5">
-                  {generatedRoadmap.map((phase, phaseIndex) => (
-                    <div key={phaseIndex} className="relative pl-12">
-                      <div
-                        className="absolute left-3 top-3 w-5 h-5 rounded-full border-2 flex items-center justify-center text-[9px] font-bold"
-                        style={{
-                          borderColor: "#7c6dff",
-                          background: "#080d1a",
-                          color: "#7c6dff",
-                        }}
-                      >
-                        {phaseIndex + 1}
-                      </div>
-                      <div className="bg-surface border border-dim rounded-2xl p-5">
-                        <h3 className="text-sm font-semibold text-ink mb-3">{phase.phase}</h3>
-                        <div className="space-y-2">
-                          {phase.items.map((item, itemIndex) => (
-                            <div
-                              key={itemIndex}
-                              className="flex items-center gap-3 py-2 px-3 bg-raised rounded-xl border border-dim"
-                            >
-                              <div
-                                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                                style={{ background: typeColors[item.type] || "#7b8ab0" }}
-                              />
-                              <span className="text-sm text-soft flex-1">{item.name}</span>
-                              <span
-                                className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                                style={{
-                                  color: typeColors[item.type] || "#7b8ab0",
-                                  background: (typeColors[item.type] || "#7b8ab0") + "15",
-                                }}
-                              >
-                                {item.type}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
+          {generated && <GeneratedRoadmapPreview key={JSON.stringify(generated)} roadmap={generated}
+            saving={savingRoadmap} savedId={savedId} onSave={saveGenerated}
+            onRegenerate={() => { setGenerated(null); setSavedId(null); setRequestError(""); }} />}
         </div></VocationalTestGate>
       )}
     </div>

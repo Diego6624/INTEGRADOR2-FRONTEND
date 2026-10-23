@@ -1,3 +1,5 @@
+import { formatAgentReply } from "../../roadmap/generatedRoadmap";
+import MarkdownContent from "@/components/MarkdownContent";
 import { useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import TypingIndicator from "./TypingIndicator";
@@ -62,7 +64,7 @@ export default function MessageList({
                 color: "#edf5ff",
               }}
             >
-              <p>{message.content}</p>
+              {isAgent ? <MarkdownContent>{formatAgentReply(message.content)}</MarkdownContent> : <p className="whitespace-pre-wrap">{message.content}</p>}
               <div className="mt-1 flex items-center justify-between gap-4 text-[10px] text-sky-100/70">
                 <span>{isMine ? "Tú" : isAgent ? "Agente IA" : activeName}</span>
                 <time>{formatTime(message.createdAt)}</time>

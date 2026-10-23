@@ -1,3 +1,4 @@
+import CategorySearch from "./CategorySearch";
 import { Button } from "@/components/ui/button";
 
 export default function ForumComposerDialog({
@@ -9,6 +10,7 @@ export default function ForumComposerDialog({
   draft,
   onDraftChange,
   onToggleTag,
+  onCategoryCreated,
   onClose,
   onSubmit,
 }) {
@@ -33,18 +35,8 @@ export default function ForumComposerDialog({
         </label>
         <fieldset className="mb-5">
           <legend className="mb-2 text-sm text-slate-200">Categorías relacionadas</legend>
-          {tags.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <label key={tag.id} className={`flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors ${draft.tagIds.includes(tag.id) ? "border-violet-400/70 bg-violet-500/15 text-white" : "border-white/10 text-slate-200 hover:bg-white/5"}`}>
-                  <input type="checkbox" checked={draft.tagIds.includes(tag.id)} onChange={() => onToggleTag(tag.id)} />
-                  {tag.name}
-                </label>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-slate-400">No hay categorías disponibles por el momento.</p>
-          )}
+          <CategorySearch key={`${mode}:${open}`} tags={tags} selectedIds={draft.tagIds} onToggle={onToggleTag}
+            onCreated={onCategoryCreated} disabled={saving} />
         </fieldset>
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={onClose} className="cursor-pointer">

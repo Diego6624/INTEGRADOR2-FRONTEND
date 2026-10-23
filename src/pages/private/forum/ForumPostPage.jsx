@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import apiFetch from "@/lib/apiClient";
+import { fetchCategories } from "./categoryApi";
 import ForumComposerDialog from "./components/ForumComposerDialog";
 
 function getApiError(error, fallback) {
@@ -60,10 +61,10 @@ export default function ForumPostPage() {
     setError("");
     try {
       await apiFetch.post(`/post/${id}/view`);
-      const [{ data }, { data: user }, { data: categoryPage }] = await Promise.all([
+      const [{ data }, { data: user }, categoryItems] = await Promise.all([
         apiFetch.get(`/post/${id}`),
         apiFetch.get("/me"),
-        apiFetch.get("/tag", { params: { page: 0, size: 100, sort: "name,asc" } }),
+        fetchCategories(),
       ]);
       const comments = data.comments ?? [];
       const commenterIds = [...new Set(comments.map((comment) => comment.user_id).filter(Boolean))];
@@ -71,7 +72,7 @@ export default function ForumPostPage() {
       const commenterNames = new Map(commenterIds.map((userId, index) => [userId, commenterResponses[index].data.name]));
 
       setCurrentUser(user);
-      setCategories(categoryPage.content ?? []);
+      setCategories(categoryItems);
       setPost({
         ...data,
         authorName: data.user?.name,
@@ -405,6 +406,10 @@ export default function ForumPostPage() {
         draft={draft}
         onDraftChange={setDraft}
         onToggleTag={toggleCategory}
+        onCategoryCreated={tag => {
+          setCategories(current => [...current.filter(item => item.id !== tag.id), tag].sort((a, b) => a.name.localeCompare(b.name)));
+          setDraft(current => ({ ...current, tagIds: [...new Set([...current.tagIds, tag.id])] }));
+        }}
         onClose={() => setShowComposer(false)}
         onSubmit={saveEdit}
       />

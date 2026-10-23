@@ -80,3 +80,26 @@ test('request failures propagate and backend validation messages are readable', 
   assert.equal(errorMessage({ response: { data: [{ campo: 'title', mensaje: 'required' }] } }, 'Fallback'), 'required');
   assert.equal(errorMessage(new Error('Network'), 'Fallback'), 'Fallback');
 });
+
+
+test('generated roadmap is saved in one request with every step, while forcing private AI source', async () => {
+  const calls = [];
+  const api = createRoadmapApi({ post: async (...args) => { calls.push(args); return { data: { id: 5 } }; } });
+  const steps = [{ title: 'Java', description: 'Practice', orderIndex: 0, x: 360, y: 80 }];
+  await api.createGeneratedRoadmap({ title: 'Backend', description: 'Plan', category: 'Software', steps, isPublic: true, createdVia: 'MANUAL' });
+  assert.equal(calls.length, 1);
+  assert.deepEqual(calls[0], ['/roadmap', { title: 'Backend', description: 'Plan', category: 'Software', steps, isPublic: false, createdVia: 'AI_AGENT' }]);
+});
+
+test('step edits preserve coordinates and delete failures propagate to keep UI data', async () => {
+  const calls = [];
+  const failure = new Error('Request rejected');
+  const api = createRoadmapApi({
+    put: async (...args) => calls.push(args),
+    delete: async path => { calls.push(path); throw failure; },
+  });
+  await api.updateStep(12, { title: 'New title', description: 'New content' });
+  assert.deepEqual(calls[0], ['/roadmap-step/12', { title: 'New title', description: 'New content' }]);
+  await assert.rejects(api.deleteStep(12), error => error === failure);
+  await assert.rejects(api.deleteRoadmap(7), error => error === failure);
+});

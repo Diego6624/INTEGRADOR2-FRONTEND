@@ -7,7 +7,8 @@ import ForumPostList from "./components/ForumPostList";
 import ForumSidebar from "./components/ForumSidebar";
 import { useNavigate } from "react-router-dom";
 
-const PAGE_SIZE = 100;
+import { fetchCategories } from "./categoryApi";
+import { fetchAllPages } from "../roadmap/roadmapApi";
 
 function sortByVotes(posts) {
   return [...posts].sort((first, second) =>
@@ -54,16 +55,15 @@ export default function Forum() {
     setLoading(true);
     setError("");
     try {
-      const [postResponse, tagResponse] = await Promise.all([
-        apiFetch.get("/post", { params: { page: 0, size: PAGE_SIZE, sort } }),
-        apiFetch.get("/tag", { params: { page: 0, size: PAGE_SIZE, sort: "name,asc" } }),
+      const [postItems, tagItems] = await Promise.all([
+        fetchAllPages("/post", { params: { sort } }, apiFetch),
+        fetchCategories(),
       ]);
-      const postItems = postResponse.data.content ?? [];
       const userIds = [...new Set(postItems.map((post) => post.userId).filter(Boolean))];
       const userResults = await Promise.all(userIds.map((id) => apiFetch.get(`/user/${id}`)));
       const namesById = new Map(userIds.map((id, index) => [id, userResults[index].data.name]));
       setPosts(postItems.map((post) => ({ ...post, authorName: namesById.get(post.userId) })));
-      setTags(tagResponse.data.content ?? []);
+      setTags(tagItems);
     } catch (requestError) {
       setError(getApiError(requestError, "No se pudo cargar el foro."));
     } finally {
@@ -218,6 +218,10 @@ export default function Forum() {
         draft={postDraft}
         onDraftChange={setPostDraft}
         onToggleTag={toggleDraftTag}
+        onCategoryCreated={tag => {
+          setTags(current => [...current.filter(item => item.id !== tag.id), tag].sort((a, b) => a.name.localeCompare(b.name)));
+          setPostDraft(current => ({ ...current, tagIds: [...new Set([...current.tagIds, tag.id])] }));
+        }}
         onClose={() => {
           setShowComposer(false);
           setError("");

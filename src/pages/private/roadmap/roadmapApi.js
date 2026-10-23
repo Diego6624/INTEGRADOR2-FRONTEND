@@ -34,6 +34,12 @@ export function createRoadmapApi(client) {
       ? client.put(`/user-step-progress/${existing.id}`, { status })
       : client.post('/user-step-progress', { status, roadmapStepId: Number(stepId) }),
     createRoadmap: values => client.post('/roadmap', { ...values, createdVia: 'MANUAL' }),
+    createGeneratedRoadmap: values => client.post('/roadmap', { ...values, createdVia: 'AI_AGENT', isPublic: false }),
+    loadConnections: (id, options) => client.get(`/roadmap/${id}/connections`, options),
+    saveConnections: (id, graph) => client.put(`/roadmap/${id}/connections`, graph),
+    deleteRoadmap: id => client.delete(`/roadmap/${id}`),
+    updateStep: (id, values) => client.put(`/roadmap-step/${id}`, values),
+    deleteStep: id => client.delete(`/roadmap-step/${id}`),
     createStep: (roadmapId, values) => client.post('/roadmap-step', { ...values, roadmapId }),
   };
 }
