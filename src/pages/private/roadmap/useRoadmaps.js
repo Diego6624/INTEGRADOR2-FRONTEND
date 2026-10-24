@@ -116,6 +116,7 @@ export default function useRoadmaps(tab) {
     if (active.current) refresh();
   });
 
+  const updateVisibility = (id, isPublic) => manageRoadmap(id, () => roadmapApi.updateVisibility(id, isPublic));
   const deleteRoadmap = id => manageRoadmap(id, () => roadmapApi.deleteRoadmap(id));
   const updateStep = (roadmapId, stepId, values) => mutate(`manage:${roadmapId}`, async () => {
     const roadmap = roadmaps.find(item => item.id === roadmapId);
@@ -136,5 +137,5 @@ export default function useRoadmaps(tab) {
   });
 
   return { vocationalAccess, roadmaps, userId, progress, loading, error, actionError, pending, revision,
-    refresh, savePosition, saveStatus, createRoadmap, createStep, deleteRoadmap, updateStep, deleteStep, saveConnections };
+    refresh, savePosition, saveStatus, createRoadmap, createStep, updateVisibility, deleteRoadmap, updateStep, deleteStep, saveConnections };
 }

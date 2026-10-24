@@ -1,3 +1,4 @@
+import { careerGroups, customAreas } from "./roadmap/careerOptions";
 import { useSearchParams } from "react-router-dom";
 import MarkdownContent from "@/components/MarkdownContent";
 import GeneratedRoadmapPreview from "./roadmap/GeneratedRoadmapPreview";
@@ -11,16 +12,6 @@ import { useState, useRef, useEffect } from "react";
 import { requireVocationalTest } from "@/lib/vocationalAccess";
 import { errorMessage } from "./roadmap/roadmapApi";
 
-const roadmapAreas = [
-  "Desarrollo Frontend",
-  "Desarrollo Backend",
-  "Machine Learning / IA",
-  "DevOps / Cloud",
-  "Bases de Datos",
-  "Seguridad Informática",
-  "Mobile Development",
-  "Data Science",
-];
 
 function displayContent(content, fromAgent) {
   if (fromAgent) return formatAgentReply(content);
@@ -45,7 +36,7 @@ export default function AIAgent() {
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
   const [conversationId, setConversationId] = useState(null)
-  const bottomRef = useRef(null);
+  const messagesRef = useRef(null);
 
 
   useEffect(() => {
@@ -77,6 +68,7 @@ export default function AIAgent() {
     hours: "10",
     areas: [],
   });
+  const roadmapAreas = careerGroups.find(group => group.careers.includes(rmForm.career))?.areas ?? customAreas;
   const [generated, setGenerated] = useState(null);
   const [savingRoadmap, setSavingRoadmap] = useState(false);
   const [savedId, setSavedId] = useState(null);
@@ -84,8 +76,11 @@ export default function AIAgent() {
   const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, thinking]);
+    const container = messagesRef.current;
+    if (mode === "consultar" && container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [messages, thinking, mode]);
 
   async function submitMessage(content) {
     if (!content.trim() || !conversationId || requestLock.current) return false;
@@ -134,6 +129,7 @@ export default function AIAgent() {
       const result = await submitMessage([
         'Genera un roadmap completo y concreto. Devuelve solo un objeto JSON valido, sin bloques de codigo: {"title":"Titulo", "description":"Resumen", "category":"Area", "steps":[{"title":"Nombre del paso", "description":"Objetivo, temas, duracion y recursos en Markdown"}],"connections":[{"source":0,"target":1}]}.',
         'Incluye conexiones usando indices de steps desde cero. Permite ramas y convergencias cuando tenga sentido y nunca ciclos ni conexiones repetidas. Incluye entre 4 y 7 pasos. title y category no deben exceder 255 caracteres. Si faltan detalles menores asume un nivel inicial y recursos gratuitos. No hagas preguntas en esta respuesta.',
+        "Adapta las alternativas, recursos y oportunidades al contexto del Perú y a la carrera seleccionada.",
         `Carrera: ${rmForm.career}. Semestre: ${rmForm.semester}.`,
         `Objetivo: ${rmForm.goal}. Disponibilidad: ${rmForm.hours} horas por semana.`,
         `Areas de interes: ${rmForm.areas.join(", ")}.`,
@@ -177,7 +173,7 @@ export default function AIAgent() {
 
   return (
     <div
-      className="h-full flex flex-col rounded-2xl border border-white/10 shadow-2xl"
+      className="h-[calc(100dvh-11rem)] min-h-80 flex flex-col overflow-hidden rounded-2xl border border-white/10 shadow-2xl"
       style={{
         background: "rgba(8, 12, 22, 0.56)",
         backdropFilter: "blur(10px)",
@@ -185,7 +181,7 @@ export default function AIAgent() {
         color: "#edf4ff",
       }}
     >
-      {requestError && <p role="alert" className="p-4 text-sm text-rose-200">{requestError}</p>}
+      {requestError && <p role="alert" className="max-h-24 flex-shrink-0 overflow-y-auto p-4 text-sm text-rose-200">{requestError}</p>}
       <div className="flex-shrink-0 p-4 md:p-6 border-b border-white/10">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -232,8 +228,8 @@ export default function AIAgent() {
       </div>
 
       {mode === "consultar" && (
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+        <div className="min-h-0 flex-1 flex flex-col overflow-hidden">
+          <div ref={messagesRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 md:p-6 space-y-4">
             {messages.map((msg, index) => (
               <div key={index} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
                 {msg.role === "ai" && (
@@ -289,10 +285,9 @@ export default function AIAgent() {
                 </div>
               </div>
             )}
-            <div ref={bottomRef} />
           </div>
 
-          <div className="px-4 md:px-6 mb-2 flex gap-2 overflow-x-auto">
+          <div className="flex-shrink-0 px-4 md:px-6 mb-2 flex gap-2 overflow-x-auto">
             {[
               "¿Qué cursos me recomiendas?",
               "¿Cómo están los profesores de Algoritmos?",
@@ -354,7 +349,7 @@ export default function AIAgent() {
       )}
 
       {mode === "roadmap" && (
-        <VocationalTestGate access={vocationalAccess} action="generar roadmaps"><div className="flex-1 overflow-y-auto p-4 md:p-6">
+        <VocationalTestGate access={vocationalAccess} action="generar roadmaps"><div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 md:p-6">
 
             <div className="max-w-3xl mx-auto space-y-5">
               <div
@@ -377,17 +372,25 @@ export default function AIAgent() {
                       <label className="block text-[10px] font-medium mb-1.5 uppercase tracking-[0.18em]" style={{ color: "rgba(224, 232, 255, 0.72)" }}>
                         Carrera
                       </label>
-                      <input
-                        type="text"
+                      <select
+                        aria-label="Carrera"
                         value={rmForm.career}
-                        onChange={(event) => setRmForm({ ...rmForm, career: event.target.value })}
+                        onChange={(event) => setRmForm(previous => ({ ...previous, career: event.target.value, areas: [] }))}
                         className="w-full rounded-xl px-3 py-2.5 text-sm transition-all"
                         style={{
-                          background: "rgba(86, 103, 146, 0.22)",
+                          background: "#172033",
                           border: "1px solid rgba(255,255,255,0.08)",
                           color: "#f2f7ff",
                         }}
-                      />
+                      >
+                        {careerGroups.map(group => (
+                          <optgroup key={group.group} label={group.group}>
+                            {group.careers.map(career => (
+                              <option key={career} value={career}>{career}</option>
+                            ))}
+                          </optgroup>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="block text-[10px] font-medium mb-1.5 uppercase tracking-[0.18em]" style={{ color: "rgba(224, 232, 255, 0.72)" }}>

@@ -114,6 +114,10 @@ function RoadmapCard({ roadmap, api }) {
         </div>
       </header>
       {owned && <div className="space-y-2">
+        <button type="button" className={button} disabled={busy}
+          onClick={() => api.updateVisibility(roadmap.id, !roadmap.isPublic)}>
+          {roadmap.isPublic ? 'Hacer privado' : 'Hacer público'}
+        </button>
         {!confirmDelete ? <button type="button" className={dangerButton} disabled={busy} onClick={() => setConfirmDelete(true)}><Trash2 className="size-4" aria-hidden="true" />Eliminar roadmap</button>
           : <div role="alert" className="space-y-3 rounded-xl border border-rose-400/30 p-3">
             <p className="text-sm text-rose-200">¿Eliminar "{roadmap.title}" con todos sus pasos y progreso? Esta acción es permanente.</p>
@@ -180,6 +184,10 @@ function RoadmapCard({ roadmap, api }) {
                     </div>)}
                     {!links.some(link => String(link.sourceId) === selected) && <p className="text-xs text-slate-400">Este paso no tiene conexiones de salida.</p>}
                     {owned && <div className="space-y-2">
+        <button type="button" className={button} disabled={busy}
+          onClick={() => api.updateVisibility(roadmap.id, !roadmap.isPublic)}>
+          {roadmap.isPublic ? 'Hacer privado' : 'Hacer público'}
+        </button>
                       <label className="block">Conectar con<select value={nextStep} disabled={busy} onChange={event => setNextStep(event.target.value)} className={`${input} mt-1`}>
                         <option value="">Selecciona otro paso</option>
                         {roadmap.steps.filter(step => validConnection(selected, step.id)).map(step => <option key={step.id} value={step.id}>{step.title}</option>)}

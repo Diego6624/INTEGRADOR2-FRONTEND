@@ -37,6 +37,7 @@ export function createRoadmapApi(client) {
     createGeneratedRoadmap: values => client.post('/roadmap', { ...values, createdVia: 'AI_AGENT', isPublic: false }),
     loadConnections: (id, options) => client.get(`/roadmap/${id}/connections`, options),
     saveConnections: (id, graph) => client.put(`/roadmap/${id}/connections`, graph),
+    updateVisibility: (id, isPublic) => client.put(`/roadmap/${id}`, { isPublic }),
     deleteRoadmap: id => client.delete(`/roadmap/${id}`),
     updateStep: (id, values) => client.put(`/roadmap-step/${id}`, values),
     deleteStep: id => client.delete(`/roadmap-step/${id}`),

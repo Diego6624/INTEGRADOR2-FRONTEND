@@ -1,13 +1,11 @@
+import { formatMessageTime as formatTime } from "@/lib/messageTime";
 import { formatAgentReply } from "../../roadmap/generatedRoadmap";
 import MarkdownContent from "@/components/MarkdownContent";
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import TypingIndicator from "./TypingIndicator";
 
-function formatTime(value) {
-  if (!value) return "";
-  return new Intl.DateTimeFormat("es", { hour: "2-digit", minute: "2-digit" }).format(new Date(value));
-}
+
 
 export default function MessageList({
   messages,
@@ -17,11 +15,14 @@ export default function MessageList({
   loading,
   conversationId,
 }) {
-  const bottomRef = useRef(null);
+  const messagesRef = useRef(null);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, conversationId, typingUser]);
+  useLayoutEffect(() => {
+    const container = messagesRef.current;
+    if (!loading && container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [messages, conversationId, typingUser, loading]);
 
   if (loading) {
     return (
@@ -50,7 +51,7 @@ export default function MessageList({
   }
 
   return (
-    <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 md:px-6">
+    <div ref={messagesRef} className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-5 md:px-6">
       {messages.length ? messages.map((message) => {
         const isMine = message.user_id === currentUserId;
         const isAgent = message.isFromAgent || message.user_id == null;
@@ -76,7 +77,6 @@ export default function MessageList({
         <p className="text-sm text-slate-300">Esta conversación aún no tiene mensajes. ¡Envía el primero!</p>
       )}
       <TypingIndicator userName={typingUser} />
-      <div ref={bottomRef} />
     </div>
   );
 }

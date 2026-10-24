@@ -1,10 +1,11 @@
+import { fetchReadStates, isMessageRead, markMessagesRead } from "@/lib/chatReadState";
+import { formatMessageTime } from "@/lib/messageTime";
 import { useEffect, useState } from "react";
 import { Bell, CheckCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import apiFetch from "@/lib/apiClient";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 
-const markerKey = (userId, id) => `journet:chat:last-read:${userId}:${id}`;
 
 export function Notifications({ userId }) {
     const navigate = useNavigate();
@@ -21,6 +22,7 @@ export function Notifications({ userId }) {
             if (running || document.hidden) return;
             running = true;
             try {
+                const readStates = await fetchReadStates(apiFetch, { signal: controller.signal });
                 const conversations = [];
                 let page = 0;
                 let data;
@@ -35,12 +37,11 @@ export function Notifications({ userId }) {
                     let more = true;
                     while (more) {
                         const { data } = await apiFetch.get(`/message/conversation/${conversation.id}`, {
-                            signal: controller.signal, params: { page, size: 100, sort: "createdAt,desc" },
+                            signal: controller.signal, params: { page, size: 100, sort: "id,desc" },
                         });
-                        const lastRead = Number(localStorage.getItem(markerKey(userId, conversation.id)) || 0);
                         const batch = data.content ?? [];
                         for (const message of batch) {
-                            if (new Date(message.createdAt).getTime() <= lastRead) { more = false; break; }
+                            if (isMessageRead(readStates, conversation.id, message)) { more = false; break; }
                             if (String(message.user_id ?? message.userId) !== String(userId)) messages.push(message);
                         }
                         page++;
@@ -51,7 +52,7 @@ export function Notifications({ userId }) {
                         latest: messages[0] };
                 }));
                 if (!controller.signal.aborted) {
-                    setItems(pending.filter(item => item.count).sort((a, b) => new Date(b.latest.createdAt) - new Date(a.latest.createdAt)));
+                    setItems(pending.filter(item => item.count && !isMessageRead(readStates, item.id, item.latest)).sort((a, b) => new Date(b.latest.createdAt) - new Date(a.latest.createdAt)));
                     setError("");
                 }
             } catch {
@@ -61,26 +62,25 @@ export function Notifications({ userId }) {
                 if (!controller.signal.aborted) setLoading(false);
             }
         }
+        function onRead() { setRevision(value => value + 1); }
         refresh();
         const timer = window.setInterval(refresh, 30000);
         window.addEventListener("focus", refresh);
-        window.addEventListener("journet:chat-read", refresh);
-        window.addEventListener("storage", refresh);
+        window.addEventListener("journet:chat-read", onRead);
         return () => {
             controller.abort();
             window.clearInterval(timer);
             window.removeEventListener("focus", refresh);
-            window.removeEventListener("journet:chat-read", refresh);
-            window.removeEventListener("storage", refresh);
+            window.removeEventListener("journet:chat-read", onRead);
         };
     }, [userId, revision]);
 
-    function markAllRead() {
+    async function markAllRead() {
         try {
-            items.forEach(item => localStorage.setItem(markerKey(userId, item.id), String(Date.now())));
+            await Promise.all(items.map(item => markMessagesRead(apiFetch, item.id, [item.latest])));
             setItems([]);
             window.dispatchEvent(new Event("journet:chat-read"));
-        } catch { setError("No se pudo guardar el estado de lectura en este navegador."); }
+        } catch { setError("No se pudo guardar el estado de lectura en el servidor."); }
     }
     const count = items.reduce((total, item) => total + item.count, 0);
     return (
@@ -99,7 +99,7 @@ export function Notifications({ userId }) {
                     {items.map(item => <DropdownMenuItem key={item.id} onClick={() => navigate(`/chat?conversation=${item.id}`)} className="flex-col items-start gap-1 p-3 cursor-pointer focus:bg-white/10 focus:text-white">
                         <span className="font-medium">{item.name} · {item.count} sin leer</span>
                         <span className="line-clamp-2 break-all text-sm text-slate-300">{item.latest.content}</span>
-                        <time className="text-xs text-slate-400" dateTime={item.latest.createdAt}>{new Date(item.latest.createdAt).toLocaleString("es-PE")}</time>
+                        <time className="text-xs text-slate-400" dateTime={item.latest.createdAt}>{formatMessageTime(item.latest.createdAt, true)}</time>
                     </DropdownMenuItem>)}
                 </>}
             </DropdownMenuContent>

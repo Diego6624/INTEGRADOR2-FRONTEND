@@ -1,17 +1,10 @@
+import { fetchReadStates, isMessageRead, markMessagesRead } from "@/lib/chatReadState";
+import { fetchAllPages } from "../../roadmap/roadmapApi";
 import { useCallback, useEffect, useRef, useState } from "react";
 import apiFetch from "@/lib/apiClient";
 import { useConversationSocket } from "@/hooks/useConversationSocket";
 
 const PAGE_SIZE = 100;
-
-function readMarkerKey(userId, conversationId) {
-  return `journet:chat:last-read:${userId}:${conversationId}`;
-}
-
-function saveReadMarker(userId, conversationId) {
-  window.localStorage.setItem(readMarkerKey(userId, conversationId), String(Date.now()));
-  window.dispatchEvent(new Event("journet:chat-read"));
-}
 
 function getApiError(error, fallback) {
   return error.response?.data?.message || error.response?.data?.error || fallback;
@@ -64,7 +57,8 @@ export default function useChats() {
         : sortByCreatedAt([...previous, normalizedMessage]));
       if (currentUserId) {
         setUnreadCounts((counts) => ({ ...counts, [normalizedMessage.conversation_id]: 0 }));
-        saveReadMarker(currentUserId, normalizedMessage.conversation_id);
+        markMessagesRead(apiFetch, normalizedMessage.conversation_id, [normalizedMessage])
+          .catch(error => setActionError(getApiError(error, "No se pudo guardar la lectura.")));
       }
       return;
     }
@@ -96,46 +90,32 @@ export default function useChats() {
     setLoading(true);
     setError("");
     try {
-      const [userResponse, conversationResponse] = await Promise.all([
+      const [userResponse, conversationResponse, readStates] = await Promise.all([
         apiFetch.get("/me"),
-        apiFetch.get("/conversation/user", { params: { page: 0, size: PAGE_SIZE, sort: "createdAt,desc" } }),
+        fetchAllPages("/conversation/user", { params: { sort: "createdAt,desc" } }, apiFetch),
+        fetchReadStates(apiFetch),
       ]);
       setCurrentUser(userResponse.data);
-      const loadedConversations = conversationResponse.data.content ?? [];
-      const latestAiConversation = loadedConversations
-        .filter((conversation) => conversation.type === "AI_AGENT")
-        .reduce((latest, conversation) => (
-          !latest || new Date(conversation.createdAt) > new Date(latest.createdAt)
-            ? conversation
-            : latest
-        ), null);
-      const visibleConversations = loadedConversations
-        .filter((conversation) => conversation.type !== "AI_AGENT");
-      if (latestAiConversation) visibleConversations.push(latestAiConversation);
-      visibleConversations.sort((first, second) =>
-        new Date(second.createdAt) - new Date(first.createdAt)
-      );
+      const loadedConversations = conversationResponse;
+      const visibleConversations = loadedConversations.filter(conversation => conversation.type !== "AI_AGENT");
 
       const unreadEntries = await Promise.all(visibleConversations.map(async (conversation) => {
-        const markerValue = window.localStorage.getItem(readMarkerKey(userResponse.data.id, conversation.id));
-        const lastReadAt = markerValue ? Number(markerValue) : null;
         let page = 0;
         let unreadCount = 0;
         let hasMore = true;
 
         while (hasMore) {
           const { data } = await apiFetch.get(`/message/conversation/${conversation.id}`, {
-            params: { page, size: PAGE_SIZE, sort: "createdAt,desc" },
+            params: { page, size: PAGE_SIZE, sort: "id,desc" },
           });
           const pageMessages = data.content ?? [];
 
           for (const message of pageMessages) {
-            const createdAt = new Date(message.createdAt).getTime();
-            if (lastReadAt !== null && createdAt <= lastReadAt) {
+            if (isMessageRead(readStates, conversation.id, message)) {
               hasMore = false;
               break;
             }
-            if ((message.user_id ?? message.userId) !== userResponse.data.id) {
+            if (String(message.user_id ?? message.userId) !== String(userResponse.data.id)) {
               unreadCount += 1;
             }
           }
@@ -176,10 +156,15 @@ export default function useChats() {
       setLoadingMessages(true);
       setActionError("");
       try {
-        const response = await apiFetch.get(`/message/conversation/${selectedId}`, {
-          params: { page: 0, size: PAGE_SIZE, sort: "createdAt,asc" },
-        });
-        if (!cancelled) setMessages((response.data.content ?? []).map(normalizeMessage));
+        const loaded = await fetchAllPages(`/message/conversation/${selectedId}`, {
+          params: { sort: "id,asc" },
+        }, apiFetch);
+        if (!cancelled) {
+          setMessages(loaded.map(normalizeMessage));
+          await markMessagesRead(apiFetch, selectedId, loaded);
+          if (cancelled) return;
+          setUnreadCounts(counts => ({ ...counts, [selectedId]: 0 }));
+        }
       } catch (requestError) {
         if (!cancelled) {
           setMessages([]);
@@ -212,9 +197,7 @@ export default function useChats() {
     setMessages([]);
     setSelectedId(conversationId);
     setTypingUser("");
-    setUnreadCounts((counts) => ({ ...counts, [conversationId]: 0 }));
-    if (currentUserId) saveReadMarker(currentUserId, conversationId);
-  }, [currentUserId, stopTyping]);
+  }, [stopTyping]);
 
   const handleDraftChange = useCallback((value) => {
     setDraft(value);
