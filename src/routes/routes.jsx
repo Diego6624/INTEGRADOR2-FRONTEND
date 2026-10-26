@@ -12,7 +12,8 @@ import { Profile } from "@/pages/private/profile/Profile";
 import Test from "@/pages/private/Test/test";
 import ProtectedRoute from "@/hooks/ProtectedRoute";
 import PublicOnlyRoute from "@/hooks/PublicOnlyRoute";
-import { Info } from "lucide-react";
+import AdminRoute from "@/hooks/AdminRoute";
+import AdminPage from "@/pages/private/admin/AdminPage";
 import Information from "@/pages/private/information/Information";
 
 
@@ -59,7 +60,11 @@ const router = createBrowserRouter(
                         {path: "/chat", element: <Chats />},
                         {path: "/profile", element: <Profile />},
                         {path: "/test", element: <Test />},
-                        {path: "/information", element: <Information />}
+                        {path: "/information", element: <Information />},
+                        {element: <AdminRoute />, children: [
+                            {path: "/admin/:section", element: <AdminPage />},
+                            {path: "/admin", element: <AdminPage />}
+                        ]}
                     ]
                 }
             ]

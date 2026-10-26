@@ -1,4 +1,4 @@
-import { Brain, ChevronRight, ClipboardCheck, Map, MessageCircle, Users, Info } from "lucide-react";
+import { Brain, ChevronRight, ClipboardCheck, Map, MessageCircle, Users, Info, ShieldCheck, FileText } from "lucide-react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
     Sidebar,
@@ -119,21 +119,18 @@ export function AppSidebar() {
                         </TooltipProvider>
                     </SidebarGroup>
 
-                    {/* RECIENTES */}
-                    <SidebarGroup>
-
-                        {/* LABEL */}
-                        <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-                            Recientes
-                        </SidebarGroupLabel>
-
-                        {/* MAP RUTAS */}
-                        {/* <TooltipProvider delayDuration={300}>
-                        <SidebarMenu className="gap-1">
-
-                        </SidebarMenu>
-                    </TooltipProvider> */}
-                    </SidebarGroup>
+                    {usuario?.role === 'ADMINISTRADOR' && <SidebarGroup className="mt-4 gap-1 border-t border-white/10 pt-4">
+                        <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">Panel de administrador</SidebarGroupLabel>
+                        <TooltipProvider delayDuration={300}><SidebarMenu className="gap-1">
+                            {[['Usuarios', Users, 'users'], ['Roadmaps', Map, 'roadmaps'], ['Publicaciones', FileText, 'posts'], ['Test vocacional', ShieldCheck, 'questions']].map(([label, Icon, section]) => (
+                                <SidebarMenuItem key={section}><SidebarMenuButton render={<Link to={`/admin/${section}`} />}
+                                    isActive={pathname === `/admin/${section}`} tooltip={label}
+                                    className="h-11 gap-3 px-3 hover:bg-gray-600 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+                                    <Icon className="size-5 shrink-0" /><span className="truncate group-data-[collapsible=icon]:hidden">{label}</span>
+                                </SidebarMenuButton></SidebarMenuItem>
+                            ))}
+                        </SidebarMenu></TooltipProvider>
+                    </SidebarGroup>}
                 </SidebarContent>
 
                 {/* PERFIL*/}

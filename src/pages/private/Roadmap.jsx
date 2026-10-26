@@ -1,11 +1,11 @@
-import { Trash2, X, GitBranch, Pencil } from 'lucide-react';
-import { canConnect } from './roadmap/roadmapGraph';
+import { Trash2, X, GitBranch, Pencil, Plus } from 'lucide-react';
+import { canConnect, adjacentPosition, connectionHandles, replaceConnection } from './roadmap/roadmapGraph';
 import MarkdownContent from '@/components/MarkdownContent';
 import StepActions from './roadmap/StepActions';
 import { Link, useSearchParams } from 'react-router-dom';
 import VocationalTestGate from '@/components/VocationalTestGate';
 import { useCallback, useRef, useState } from 'react';
-import { ReactFlow, Background, Controls, Handle, Position, applyNodeChanges } from '@xyflow/react';
+import { ReactFlow, Background, Controls, Handle, Position, ConnectionMode, Panel, BaseEdge, getSmoothStepPath, applyNodeChanges } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import useRoadmaps from './roadmap/useRoadmaps';
 import { buildNodes } from './roadmap/roadmapApi';
@@ -30,20 +30,96 @@ function StatusSelect({ status, disabled, onChange }) {
 }
 
 function RoadmapNode({ data }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [confirming, setConfirming] = useState(false);
+  const savingLock = useRef(false);
+  const cancelled = useRef(false);
+  const focusTitle = useCallback(element => { if (element) { element.focus(); element.select(); } }, []);
   const option = OPTIONS.find(item => item.value === data.status) ?? OPTIONS[0];
+  const beginEdit = () => {
+    if (!data.editable) return;
+    cancelled.current = false;
+    setDraft(data.label); setError(''); setEditing(true);
+  };
+  async function saveTitle() {
+    if (cancelled.current || savingLock.current) return;
+    const title = draft.trim();
+    if (!title) { setError('Escribe un nombre.'); return; }
+    if (title === data.label) { setEditing(false); return; }
+    if (!data.editable) return;
+    savingLock.current = true; setSaving(true); setError('');
+    try {
+      if (await data.onRename(title)) setEditing(false);
+      else setError('No se pudo guardar. Intenta nuevamente.');
+    } finally { savingLock.current = false; setSaving(false); }
+  }
   return (
-    <>
-      <Handle type="target" position={Position.Top} className="!size-3 !border-indigo-200 !bg-indigo-500" />
+    <div className={`group/block relative h-full w-full ${editing ? 'nodrag' : ''}`}>
+      {data.owned && <div className="absolute -inset-8 -z-10" />}
+      {[['top', Position.Top, '-top-9 left-1/2 -translate-x-1/2'],
+        ['bottom', Position.Bottom, '-bottom-9 left-1/2 -translate-x-1/2'],
+        ['left', Position.Left, '-left-9 top-1/2 -translate-y-1/2'],
+        ['right', Position.Right, '-right-9 top-1/2 -translate-y-1/2']].map(([direction, position, placement]) => (
+        <div key={direction}>
+          <Handle id={direction} type="source" position={position} isConnectable={data.editable && !editing}
+            className="!size-3 !border-indigo-200 !bg-indigo-500" />
+          {data.owned && !editing && <button type="button" disabled={!data.editable}
+            className={`nodrag nopan roadmap-node-action absolute ${placement} flex size-6 items-center justify-center rounded-full border border-indigo-300/60 bg-slate-900 text-indigo-200 shadow-md hover:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-white disabled:opacity-40`}
+            aria-label={`Agregar bloque ${direction === 'top' ? 'arriba' : direction === 'bottom' ? 'abajo' : direction === 'left' ? 'a la izquierda' : 'a la derecha'} de ${data.label}`}
+            title="Crear bloque conectado"
+            onClick={event => { event.stopPropagation(); data.onAdd(direction); }}>
+            <Plus className="size-4" aria-hidden="true" />
+          </button>}
+        </div>
+      ))}
+      {data.owned && !editing && <button type="button" disabled={!data.editable}
+        className="nodrag nopan roadmap-node-action absolute -top-8 right-0 flex size-6 items-center justify-center rounded-full border border-rose-400/50 bg-slate-950 text-rose-300 hover:bg-rose-500/25 focus-visible:outline-2 focus-visible:outline-rose-300 disabled:opacity-40"
+        aria-label={`Eliminar bloque ${data.label}`} title="Eliminar bloque"
+        onClick={event => { event.stopPropagation(); setConfirming(true); }}>
+        <Trash2 className="size-3.5" aria-hidden="true" />
+      </button>}
       <div className="flex h-full w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-3 text-center text-sm text-white shadow-lg"
-        style={{ border: `1.5px solid ${option.color}` }} title={data.description}>
-        {data.status === 'HECHO' && <span className="text-emerald-300">✓</span>}
-        <span className="line-clamp-2">{data.label}</span>
+        style={{ border: `1.5px solid ${option.color}` }} title={data.owned ? 'Doble clic para editar el nombre' : data.description}
+        onDoubleClick={event => { event.stopPropagation(); beginEdit(); }}>
+        {editing ? <input ref={focusTitle}
+          className="nodrag nopan nowheel w-full rounded border border-indigo-400 bg-slate-950 px-2 py-1 text-center text-sm text-white outline-none focus:ring-2 focus:ring-indigo-400/40"
+          aria-label="Nombre del bloque" aria-invalid={Boolean(error)} value={draft} disabled={saving} maxLength={255}
+          onChange={event => { setDraft(event.target.value); setError(''); }} onBlur={saveTitle}
+          onClick={event => event.stopPropagation()} onDoubleClick={event => event.stopPropagation()}
+          onKeyDown={event => {
+            event.stopPropagation();
+            if (event.key === 'Enter') { event.preventDefault(); saveTitle(); }
+            if (event.key === 'Escape' && !saving) { cancelled.current = true; setEditing(false); setError(''); }
+          }} /> : <span role={data.owned ? 'button' : undefined} tabIndex={data.owned ? 0 : undefined}
+          onKeyDown={event => { if (event.key === 'Enter' || event.key === 'F2') { event.preventDefault(); event.stopPropagation(); beginEdit(); } }}
+          className="line-clamp-2 rounded focus-visible:outline-2 focus-visible:outline-indigo-300">{data.status === 'HECHO' ? '\u2713 ' : ''}{data.label}</span>}
       </div>
-      <Handle type="source" position={Position.Bottom} className="!size-3 !border-indigo-200 !bg-indigo-500" />
-    </>
+      {error && <p role="alert" className="nodrag absolute left-0 top-full z-30 mt-1 w-full rounded bg-slate-950 p-2 text-xs text-rose-300">{error}</p>}
+      {confirming && <div role="alert" className="nodrag nopan absolute left-0 top-full z-40 mt-2 w-64 space-y-2 rounded-xl border border-rose-400/40 bg-slate-950 p-3 text-xs text-white shadow-xl" onClick={event => event.stopPropagation()}>
+        <p>Eliminar este bloque, sus enlaces y su progreso?</p>
+        <div className="flex gap-2"><button type="button" className="rounded bg-rose-500/20 px-3 py-2 text-rose-200" disabled={!data.editable} onClick={data.onDelete}>Eliminar</button>
+          <button type="button" className="rounded border border-white/20 px-3 py-2" disabled={!data.editable} onClick={() => setConfirming(false)}>Cancelar</button></div>
+      </div>}
+    </div>
   );
 }
+
+function RoadmapEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, markerEnd, style, data }) {
+  const [path, labelX, labelY] = getSmoothStepPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition });
+  return <g className="roadmap-edge">
+    <BaseEdge id={id} path={path} markerEnd={markerEnd} style={style} interactionWidth={28} />
+    {data.owned && <foreignObject x={labelX - 18} y={labelY - 18} width={36} height={36} className="roadmap-edge-action overflow-visible">
+      <button type="button" disabled={!data.editable} aria-label="Eliminar enlace" title="Eliminar enlace"
+        className="nodrag nopan flex size-9 items-center justify-center rounded-full border border-rose-400/50 bg-slate-950 text-rose-300 shadow-lg hover:bg-rose-950 focus-visible:outline-2 focus-visible:outline-rose-300 disabled:opacity-40"
+        onClick={event => { event.stopPropagation(); data.onDelete(); }}><Trash2 className="size-4" aria-hidden="true" /></button>
+    </foreignObject>}
+  </g>;
+}
 const NODE_TYPES = { roadmap: RoadmapNode };
+const EDGE_TYPES = { roadmap: RoadmapEdge };
 
 function RoadmapCard({ roadmap, api }) {
   const [view, setView] = useState('map');
@@ -53,6 +129,7 @@ function RoadmapCard({ roadmap, api }) {
   const [nextStep, setNextStep] = useState("");
   const [nodes, setNodes] = useState(() => buildNodes(roadmap.steps));
   const dragOrigins = useRef(new Map());
+  const reconnecting = useRef(null);
   const formRef = useRef(null);
   const owned = String(roadmap.userId) === String(api.userId);
   const selectedStep = roadmap.steps.find(step => String(step.id) === selected);
@@ -62,9 +139,18 @@ function RoadmapCard({ roadmap, api }) {
   const percentage = roadmap.steps.length ? Math.round(done / roadmap.steps.length * 100) : 0;
   const sorted = [...roadmap.steps].sort((a, b) => a.orderIndex - b.orderIndex || a.id - b.id);
   const links = roadmap.graph.links;
+  const allNodes = [...nodes, ...buildNodes(roadmap.steps).filter(node => !nodes.some(item => item.id === node.id))];
+  const positionOf = id => allNodes.find(node => node.id === String(id))?.position ?? { x: 360, y: 80 };
+  const addAdjacent = (id, direction) => {
+    if (!owned || busy) return;
+    const position = adjacentPosition(positionOf(id), direction, allNodes.map(node => node.position));
+    api.createLinkedStep(roadmap.id, id, direction, position, step => setSelected(String(step.id)));
+  };
   const edges = links.map(link => ({
     id: `${link.sourceId}-${link.targetId}`, source: String(link.sourceId), target: String(link.targetId),
-    type: 'smoothstep', markerEnd: { type: 'arrowclosed', color: '#818cf8' },
+    ...connectionHandles(positionOf(link.sourceId), positionOf(link.targetId)),
+    data: { owned, editable: owned && !busy, onDelete: () => api.saveConnections(roadmap.id, links.filter(item => item !== link)) },
+    type: 'roadmap', markerEnd: { type: 'arrowclosed', color: '#818cf8' },
     style: { stroke: '#818cf8', strokeWidth: 2 },
   }));
   const validConnection = (source, target) => canConnect(links, source, target, roadmap.steps.map(step => step.id));
@@ -72,13 +158,16 @@ function RoadmapCard({ roadmap, api }) {
     if (!owned || busy || !validConnection(source, target)) return;
     api.saveConnections(roadmap.id, [...links, { sourceId: Number(source), targetId: Number(target) }]);
   };
-  const displayNodes = nodes.map(node => ({ ...node,
+  const displayNodes = allNodes.map(node => ({ ...node,
     draggable: owned && !busy && !api.pending[`position:${node.id}`],
-    data: { ...node.data, label: roadmap.steps.find(step => String(step.id) === node.id)?.title, description: roadmap.steps.find(step => String(step.id) === node.id)?.description, status: api.progress[node.id]?.status ?? 'PENDIENTE' },
+    data: { ...node.data, owned, editable: owned && !busy, onAdd: direction => addAdjacent(node.id, direction), onRename: title => api.updateStep(roadmap.id, Number(node.id), { title }), onDelete: () => api.deleteStep(roadmap.id, Number(node.id)), label: roadmap.steps.find(step => String(step.id) === node.id)?.title, description: roadmap.steps.find(step => String(step.id) === node.id)?.description, status: api.progress[node.id]?.status ?? 'PENDIENTE' },
   }));
   const handleNodesChange = useCallback(changes => {
-    setNodes(previous => applyNodeChanges(changes.filter(change => change.type !== 'remove'), previous));
-  }, []);
+    setNodes(previous => {
+      const current = [...previous, ...buildNodes(roadmap.steps).filter(node => !previous.some(item => item.id === node.id))];
+      return applyNodeChanges(changes.filter(change => change.type !== 'remove'), current);
+    });
+  }, [roadmap.steps]);
 
   async function handleDragStop(_, node) {
     const origin = dragOrigins.current.get(node.id);
@@ -113,6 +202,10 @@ function RoadmapCard({ roadmap, api }) {
           </button>)}
         </div>
       </header>
+      {roadmap.isPublic && <button type="button" className={button} disabled={busy}
+        aria-pressed={roadmap.likedByCurrentUser} onClick={() => api.toggleLike(roadmap)}>
+        {roadmap.likedByCurrentUser ? 'Quitar me gusta' : 'Me gusta'} · {roadmap.likesCount ?? 0}
+      </button>}
       {owned && <div className="space-y-2">
         <button type="button" className={button} disabled={busy}
           onClick={() => api.updateVisibility(roadmap.id, !roadmap.isPublic)}>
@@ -134,7 +227,7 @@ function RoadmapCard({ roadmap, api }) {
           <div className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400" style={{ width: `${percentage}%` }} />
         </div>
       </div>
-      {!sorted.length ? <p className="text-sm text-slate-400">Este roadmap todavía no tiene pasos.</p>
+      {!sorted.length && view === 'list' ? <p className="text-sm text-slate-400">Este roadmap todavía no tiene pasos.</p>
         : view === 'list' ? (
           <ol className="space-y-2">
             {sorted.map(step => <li key={step.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white/5 p-3">
@@ -150,16 +243,30 @@ function RoadmapCard({ roadmap, api }) {
         ) : (
           <div className="space-y-3">
             <p className="text-xs text-slate-400">{owned ? 'Arrastra un paso para guardar su posición. ' : ''}Selecciona un paso para actualizar tu avance.</p>
-            {owned && <p className="flex items-center gap-2 text-xs text-indigo-200"><GitBranch className="size-4" />Conecta los puntos de dos pasos para crear una rama. Tambien puedes agregar conexiones desde el panel lateral.</p>}
+            {owned && <p className="flex items-center gap-2 text-xs text-indigo-200"><GitBranch className="size-4" />Doble clic para editar el nombre. Pasa el cursor para ver los botones + y eliminar. Arrastra un punto para enlazar bloques o un extremo del enlace para moverlo.</p>}
             <div className="relative flex h-[600px] overflow-hidden rounded-xl border border-white/10">
               <div className="min-w-0 flex-1">
-                <ReactFlow nodes={displayNodes} edges={edges} nodeTypes={NODE_TYPES} onNodesChange={handleNodesChange}
+                <ReactFlow nodes={displayNodes} edges={edges} nodeTypes={NODE_TYPES} edgeTypes={EDGE_TYPES} zoomOnDoubleClick={false} onNodesChange={handleNodesChange}
                   nodeOrigin={[0.5, 0.5]} onNodeClick={(_, node) => { setSelected(node.id); setNextStep(""); }}
                   onEdgeClick={(_, edge) => { setSelected(edge.source); setNextStep(""); }}
                   onNodeDragStart={(_, node) => dragOrigins.current.set(node.id, { ...node.position })} onNodeDragStop={handleDragStop}
-                  nodesDraggable={owned && !busy} nodesConnectable={owned && !busy} edgesReconnectable={false} deleteKeyCode={null}
-                  onConnect={({ source, target }) => connect(source, target)} isValidConnection={({ source, target }) => validConnection(source, target)}
+                  nodesDraggable={owned && !busy} nodesConnectable={owned && !busy} edgesReconnectable={owned && !busy} reconnectRadius={20} connectionMode={ConnectionMode.Loose} deleteKeyCode={null}
+                  onReconnectStart={(_, edge) => { reconnecting.current = edge; }}
+                  onReconnectEnd={() => { reconnecting.current = null; }}
+                  onReconnect={(edge, connection) => {
+                    if (!owned || busy) return;
+                    const updated = replaceConnection(links, edge, connection, roadmap.steps.map(step => step.id));
+                    if (updated) api.saveConnections(roadmap.id, updated);
+                  }}
+                  onConnect={({ source, target }) => connect(source, target)} isValidConnection={connection => reconnecting.current
+                    ? replaceConnection(links, reconnecting.current, connection, roadmap.steps.map(step => step.id)) !== null
+                    : validConnection(connection.source, connection.target)}
                   fitView fitViewOptions={{ padding: 0.2 }} minZoom={0.2} maxZoom={2} colorMode="dark">
+                  {owned && <Panel position="top-left"><button type="button" className={`${button} flex items-center gap-2 bg-slate-950/95`} disabled={busy}
+                    onClick={() => {
+                      const position = adjacentPosition({ x: 360, y: -100 }, 'bottom', allNodes.map(node => node.position));
+                      api.createLinkedStep(roadmap.id, null, 'bottom', position, step => setSelected(String(step.id)));
+                    }}><Plus className="size-4" />Agregar bloque</button></Panel>}
                   <Background color="#1e2d4a" gap={24} /><Controls showInteractive={false} />
                 </ReactFlow>
               </div>
@@ -215,7 +322,7 @@ function RoadmapCard({ roadmap, api }) {
 export default function RoadmapPage() {
   const [searchParams] = useSearchParams();
   const focusedId = searchParams.get("roadmap");
-  const [tab, setTab] = useState('mis');
+  const [tab, setTab] = useState(focusedId ? 'comunidad' : 'mis');
   const [creating, setCreating] = useState(false);
   const api = useRoadmaps(tab);
   const busy = Object.values(api.pending).some(Boolean);

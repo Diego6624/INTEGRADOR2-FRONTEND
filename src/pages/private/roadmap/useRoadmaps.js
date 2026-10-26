@@ -42,11 +42,12 @@ export default function useRoadmaps(tab) {
         ]);
         const visible = tab === 'comunidad' ? listed.filter(item => item.isPublic) : listed;
         const detailed = await Promise.all(visible.map(async item => {
-          const [steps, { data: graph }] = await Promise.all([
+          const [steps, { data: graph }, { data: engagement }] = await Promise.all([
             fetchAllPages(`/roadmap-step/roadmap/${item.id}`, { signal, params: { sort: 'orderIndex,asc' } }),
             roadmapApi.loadConnections(item.id, { signal }),
+            apiFetch.get(`/roadmap/${item.id}/like`, { signal }),
           ]);
-          return { ...item, steps, graph };
+          return { ...item, ...engagement, steps, graph };
         }));
         if (signal.aborted) return;
         setUserId(user.id);
@@ -74,13 +75,20 @@ export default function useRoadmaps(tab) {
       await task();
       return true;
     } catch (requestError) {
-      if (active.current) setActionError(errorMessage(requestError, 'No se pudo guardar el cambio. Inténtalo nuevamente.'));
+      if (active.current) setActionError(errorMessage(requestError, requestError.message?.startsWith('El bloque se guardo') ? requestError.message : 'No se pudo guardar el cambio. Inténtalo nuevamente.'));
       return false;
     } finally {
       locks.current.delete(key);
       if (active.current) setPending(previous => ({ ...previous, [key]: false }));
     }
   }, []);
+
+  const toggleLike = roadmap => mutate(`like:${roadmap.id}`, async () => {
+    const { data } = await (roadmap.likedByCurrentUser
+      ? apiFetch.delete(`/roadmap/${roadmap.id}/like`)
+      : apiFetch.post(`/roadmap/${roadmap.id}/like`));
+    if (active.current) setRoadmaps(items => items.map(item => item.id === roadmap.id ? { ...item, ...data } : item));
+  });
 
   const savePosition = (roadmapId, stepId, position) => mutate(`position:${stepId}`, async () => {
     const owner = roadmaps.find(item => item.id === roadmapId);
@@ -107,6 +115,33 @@ export default function useRoadmaps(tab) {
     if (!owner || String(owner.userId) !== String(userId)) throw new Error('Roadmap ajeno');
     await roadmapApi.createStep(roadmapId, values);
     if (active.current) refresh();
+  });
+
+  const createLinkedStep = (roadmapId, anchorId, direction, position, onCreated) => mutate(`manage:${roadmapId}`, async () => {
+    const roadmap = roadmaps.find(item => item.id === roadmapId);
+    if (!roadmap || String(roadmap.userId) !== String(userId)) throw new Error('Roadmap ajeno');
+    const { data: step } = await roadmapApi.createStep(roadmapId, {
+      title: 'Nuevo bloque', description: 'Agrega el contenido de este paso.',
+      orderIndex: Math.max(-1, ...roadmap.steps.map(item => item.orderIndex ?? 0)) + 1,
+      ...position,
+    });
+    // Keep the saved block visible even if saving its connection fails.
+    if (active.current) {
+      setRoadmaps(items => items.map(item => item.id === roadmapId ? { ...item, steps: [...item.steps, step] } : item));
+      onCreated?.(step);
+    }
+    const link = direction === 'top' || direction === 'left'
+      ? { sourceId: step.id, targetId: Number(anchorId) }
+      : { sourceId: Number(anchorId), targetId: step.id };
+    try {
+      const { data: graph } = await roadmapApi.saveConnections(roadmapId, {
+        version: roadmap.graph.version, links: anchorId == null ? roadmap.graph.links : [...roadmap.graph.links, link],
+      });
+      if (active.current) setRoadmaps(items => items.map(item => item.id === roadmapId ? { ...item, graph } : item));
+    } catch (error) {
+      const detail = errorMessage(error, 'Intenta conectar el bloque nuevamente.');
+      throw new Error(`El bloque se guardo, pero no se pudo guardar su enlace. ${detail}`, { cause: error });
+    }
   });
 
   const manageRoadmap = (roadmapId, task) => mutate(`manage:${roadmapId}`, async () => {
@@ -137,5 +172,5 @@ export default function useRoadmaps(tab) {
   });
 
   return { vocationalAccess, roadmaps, userId, progress, loading, error, actionError, pending, revision,
-    refresh, savePosition, saveStatus, createRoadmap, createStep, updateVisibility, deleteRoadmap, updateStep, deleteStep, saveConnections };
+    refresh, toggleLike, savePosition, saveStatus, createRoadmap, createStep, createLinkedStep, updateVisibility, deleteRoadmap, updateStep, deleteStep, saveConnections };
 }

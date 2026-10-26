@@ -14,6 +14,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+  --font-sans: "Roboto", sans-serif;
+  --font-heading: "Fraunces", serif;
   --font-fraunces: "Fraunces", serif;
   --font-roboto: "Roboto", sans-serif;
   --font-poppins: "Poppins", sans-serif;
@@ -61,8 +63,8 @@
 
 @layer base {
   .theme {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
+    --font-heading: "Fraunces", serif;
+    --font-sans: "Roboto", sans-serif;
   }
   :root {
     --background: oklch(1 0 0);
@@ -133,6 +135,9 @@
   html {
     @apply font-sans;
   }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
 }
 
 /* LOOP ReviewsHome.jsx */
@@ -173,4 +178,25 @@ html {
 
 *::-webkit-scrollbar-thumb:hover {
   background-color: #9388ff;
+}
+/* Reveal canvas actions on hover or keyboard focus without covering the map. */
+.roadmap-node-action,
+.roadmap-edge-action {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+.group\/block:hover .roadmap-node-action,
+.group\/block:focus-within .roadmap-node-action,
+.roadmap-edge:hover .roadmap-edge-action,
+.roadmap-edge:focus-within .roadmap-edge-action {
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (hover: none) {
+  .react-flow__node.selected .roadmap-node-action,
+  .react-flow__edge.selected .roadmap-edge-action {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
