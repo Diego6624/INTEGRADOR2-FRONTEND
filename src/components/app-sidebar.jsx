@@ -11,6 +11,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarTrigger,
+    useSidebar,
 } from "@/components/ui/sidebar";
 import {
     DropdownMenu,
@@ -21,7 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useContext } from "react";
+import { useContext, useId, useState } from "react";
 import { userInitials } from "@/lib/userIdentity";
 import { AuthContext } from "@/context/AuthContext";
 
@@ -40,9 +41,42 @@ const projects = [
 // depender de estar dentro de él.
 
 
+function MobileAccountMenu({ usuario, onLogout, onNavigate }) {
+    const [expanded, setExpanded] = useState(false);
+    const [loggingOut, setLoggingOut] = useState(false);
+    const actionsId = useId();
+
+    async function logout() {
+        if (loggingOut) return;
+        setLoggingOut(true);
+        try { await onLogout(); }
+        finally { setLoggingOut(false); }
+    }
+
+    return <div className="w-full min-w-0">
+        <SidebarMenuButton type="button" className="h-16 w-full gap-3 px-3" aria-expanded={expanded}
+            aria-controls={actionsId} disabled={loggingOut} onClick={() => setExpanded(value => !value)}>
+            <Avatar size="sm" className="shrink-0"><AvatarFallback className="bg-blue-500 text-white">{userInitials(usuario?.name)}</AvatarFallback></Avatar>
+            <span className="min-w-0 flex-1 text-left">
+                <span className="block truncate text-sm">{usuario?.name || "Usuario"}</span>
+                <span className="block truncate text-xs text-muted-foreground">{usuario?.university || usuario?.email || "Mi cuenta"}</span>
+            </span>
+            <ChevronRight aria-hidden="true" className={`size-4 shrink-0 transition-transform ${expanded ? 'rotate-90' : ''}`} />
+        </SidebarMenuButton>
+        <div id={actionsId} hidden={!expanded} className="space-y-1 border-t border-white/10 p-2">
+            <Link to="/profile" onClick={onNavigate} className="flex min-h-11 items-center rounded-lg px-3 text-sm hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-blue-400">Ver perfil</Link>
+            <button type="button" disabled={loggingOut} onClick={logout}
+                className="flex min-h-11 w-full items-center rounded-lg px-3 text-left text-sm text-red-400 hover:bg-red-500/10 focus-visible:outline-2 focus-visible:outline-red-400 disabled:opacity-50">
+                {loggingOut ? 'Cerrando sesi\u00f3n...' : 'Cerrar sesi\u00f3n'}
+            </button>
+        </div>
+    </div>;
+}
+
 export function AppSidebar() {
 
     const { pathname } = useLocation();
+    const { isMobile, setOpenMobile } = useSidebar();
     const navigate = useNavigate()
     const { cerrarSesion, usuario } = useContext(AuthContext)
 
@@ -137,7 +171,9 @@ export function AppSidebar() {
                 <SidebarFooter className="flex items-center">
                     <SidebarMenu>
                         <SidebarMenuItem className={"w-full flex justify-center"}>
-                            <DropdownMenu>
+                            {isMobile ? <MobileAccountMenu usuario={usuario}
+                                onNavigate={() => setOpenMobile(false)}
+                                onLogout={async () => { setOpenMobile(false); await handleLogout(); }} /> : <DropdownMenu>
                                 {/* BOTÓN DEL PERFIL */}
                                 <DropdownMenuTrigger
                                     render={
@@ -205,7 +241,7 @@ export function AppSidebar() {
                                         Cerrar sesión
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
-                            </DropdownMenu>
+                            </DropdownMenu>}
                         </SidebarMenuItem>
                     </SidebarMenu>
                     <SidebarTrigger className="shrink-0 size-8 hover:bg-gray-600 transition cursor-pointer" />
