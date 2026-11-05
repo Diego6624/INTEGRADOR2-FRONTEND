@@ -184,7 +184,7 @@ html {
 .roadmap-edge-action {
   opacity: 0;
   pointer-events: none;
-  transition: opacity 150ms ease;
+  transition: opacity 140ms ease;
 }
 .group\/block:hover .roadmap-node-action,
 .group\/block:focus-within .roadmap-node-action,
