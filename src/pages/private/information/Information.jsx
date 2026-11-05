@@ -43,7 +43,7 @@ const Information = () => {
                         Ir al portal de consultas
                         <ArrowUpRight className="size-4" aria-hidden="true" />
                     </a>
-                    <p className="text-xs text-slate-400">Se abrirá en una pestaña nueva.</p>
+                    <p className="text-xs text-slate-300">Se abrirá en una pestaña nueva.</p>
                 </div>
 
                 <div className="min-w-0 border-t border-white/10 pt-8 xl:border-l xl:border-t-0 xl:pl-10 xl:pt-0">
