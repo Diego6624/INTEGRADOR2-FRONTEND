@@ -35,7 +35,7 @@ const Information = () => {
                         Entra al portal de soporte para registrar tu consulta. Así podremos conocer los detalles y darle seguimiento.
                     </p>
                     <a
-                        href="https://pedrodavidsworkspace-40174552.atlassian.net/servicedesk/customer/portals"
+                        href="https://pedrodavidsworkspace-40174552.atlassian.net/servicedesk/customer/portal/4"
                         target="_blank"
                         rel="noreferrer"
                         className="mt-2 inline-flex min-h-12 items-center gap-2 rounded-lg bg-blue-500 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400"
@@ -43,7 +43,7 @@ const Information = () => {
                         Ir al portal de consultas
                         <ArrowUpRight className="size-4" aria-hidden="true" />
                     </a>
-                    <p className="text-xs text-slate-400">Se abrirá en una pestaña nueva.</p>
+                    <p className="text-xs text-slate-300">Se abrirá en una pestaña nueva.</p>
                 </div>
 
                 <div className="min-w-0 border-t border-white/10 pt-8 xl:border-l xl:border-t-0 xl:pl-10 xl:pt-0">
